@@ -8,11 +8,8 @@ python-engineio==4.9.1
 python-socketio==5.11.2
 simple-websocket==1.0.0
 
-# Async worker for SocketIO on Render (gunicorn needs this)
-eventlet==0.37.0
-
-# Production WSGI server
-gunicorn==22.0.0
+# Production WSGI server (threaded mode, no eventlet needed)
+gunicorn==23.0.0
 
 # Database adapters
 psycopg2-binary==2.9.9
