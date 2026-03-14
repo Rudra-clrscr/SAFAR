@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join SAFAR — Login or Create Account</title>
+  <meta name="description" content="Sign in or create your free SAFAR account to start planning smart, safe group travel across India.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body class="auth-page">
+  <div class="auth-split">
+    <!-- Left: Visual branding side -->
+    <div class="auth-split-visual">
+      <img src="/static/images/hero_bg.png" alt="Travel">
+      <div class="hero-v2-overlay"></div>
+      <div class="auth-split-visual-content">
+        <div style="font-size:3.5rem;margin-bottom:20px;">✈️</div>
+        <h2><span class="logo-safar" style="font-size:2.6rem">SAFAR</span></h2>
+        <p style="margin-top:12px">Travel Smart. Travel Safe. Travel Together.</p>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:32px;">
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--tt);font-family:'Syne',sans-serif">500+</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px">Travelers</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--tt);font-family:'Syne',sans-serif">17</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px">Safety Zones</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--ast);font-family:'Syne',sans-serif">24/7</div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px">AI Assistant</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Auth form -->
+    <div class="auth-split-form">
+      <div class="auth-box">
+        <div class="auth-logo">
+          <h1>Welcome to <span class="tt-text">SAFAR</span></h1>
+          <p>Your journey to smarter, safer travel starts here.</p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for cat, msg in messages %}<div
+          class="flash-msg {{cat}}">{{msg}}</div>{% endfor %}{% endif %}{% endwith %}
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchTab('login')"><i class="fas fa-sign-in-alt" style="margin-right:5px"></i> Login</button>
+          <button class="auth-tab" onclick="switchTab('register')"><i class="fas fa-user-plus" style="margin-right:5px"></i> Register</button>
+          <button class="auth-tab" onclick="switchTab('tourist')"><i class="fas fa-shield-alt" style="margin-right:5px"></i> Tourist</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="auth-panel active" id="panel-login">
+          <form class="auth-form" onsubmit="handleLogin(event)">
+            <div class="form-group"><label><i class="fas fa-user" style="margin-right:5px"></i> Username</label><input type="text" id="l-user" placeholder="Your username"
+                required></div>
+            <div class="form-group"><label><i class="fas fa-lock" style="margin-right:5px"></i> Password</label><input type="password" id="l-pass" placeholder="Your password"
+                required></div>
+            <button type="submit" class="btn btn-tt"
+              style="width:100%;padding:12px;border-radius:var(--radius)"><i class="fas fa-arrow-right" style="margin-right:6px"></i> Login</button>
+          </form>
+          <p style="text-align:center;margin-top:16px;font-size:0.84rem;color:var(--text2)">No account? <span
+              class="tt-text" style="cursor:pointer;font-weight:600" onclick="switchTab('register')">Join SAFAR</span></p>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="auth-panel" id="panel-register">
+          <form class="auth-form" onsubmit="handleRegister(event)">
+            <div class="form-group"><label>Username</label><input type="text" id="r-user" placeholder="Choose username"
+                required></div>
+            <div class="form-group"><label>Email</label><input type="email" id="r-email" placeholder="your@email.com"
+                required></div>
+            <div class="form-group"><label>Password</label><input type="password" id="r-pass"
+                placeholder="Letter+number+special, 6+ chars" required></div>
+            <div class="form-group"><label>Phone (optional)</label><input type="tel" id="r-phone"
+                placeholder="+91xxxxxxxxxx"></div>
+            <div class="form-group"><label>Gender</label>
+              <select id="r-gender">
+                <option value="">Prefer not to say</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Bio (optional)</label><textarea id="r-bio"
+                placeholder="Tell fellow travelers about yourself..." style="min-height:68px"></textarea></div>
+            <button type="submit" class="btn btn-tt" style="width:100%;padding:12px;border-radius:var(--radius)"><i class="fas fa-user-plus" style="margin-right:6px"></i> Join SAFAR</button>
+          </form>
+          <p style="text-align:center;margin-top:16px;font-size:0.84rem;color:var(--text2)">Already a traveler? <span
+              class="tt-text" style="cursor:pointer;font-weight:600" onclick="switchTab('login')">Login</span></p>
+        </div>
+
+        <!-- TOURIST OTP -->
+        <div class="auth-panel" id="panel-tourist">
+          <div style="text-align:center;margin-bottom:16px"><span class="badge badge-ast">🛡️ Tourist Safety Registration</span></div>
+          <div id="t-step1">
+            <form class="auth-form" onsubmit="sendTouristOTP(event)">
+              <div class="form-group"><label>Full Name</label><input type="text" id="t-name" placeholder="As on ID document"
+                  required></div>
+              <div class="form-group"><label>Phone (E.164)</label><input type="tel" id="t-phone" placeholder="+91xxxxxxxxxx"
+                  required></div>
+              <div class="form-group"><label>KYC Type</label>
+                <select id="t-kyc-type">
+                  <option value="Aadhaar">Aadhaar</option>
+                  <option value="Passport">Passport</option>
+                  <option value="Voter ID">Voter ID</option>
+                </select>
+              </div>
+              <div class="form-group"><label>KYC Number</label><input type="text" id="t-kyc-id"
+                  placeholder="Document number" required></div>
+              <div class="form-group"><label>Visit Duration (days)</label><input type="number" id="t-dur"
+                  placeholder="e.g. 7" min="1" required></div>
+              <button type="submit" class="btn btn-ast" style="width:100%;padding:12px;border-radius:var(--radius)"><i class="fas fa-paper-plane" style="margin-right:6px"></i> Send
+                OTP</button>
+            </form>
+          </div>
+          <div id="t-step2" class="hidden">
+            <div class="flash-msg success" style="margin-bottom:16px">📱 OTP sent! Check your SMS or terminal.</div>
+            <form class="auth-form" onsubmit="verifyTouristOTP(event)">
+              <div class="form-group"><label>OTP Code</label><input type="text" id="t-otp" placeholder="6-digit code"
+                  maxlength="6" required></div>
+              <button type="submit" class="btn btn-ast" style="width:100%;padding:12px;border-radius:var(--radius)"><i class="fas fa-check" style="margin-right:6px"></i> Verify &
+                Register</button>
+            </form>
+            <button
+              onclick="document.getElementById('t-step2').classList.add('hidden');document.getElementById('t-step1').classList.remove('hidden')"
+              class="btn btn-ghost btn-sm" style="width:100%;margin-top:9px">← Back</button>
+          </div>
+        </div>
+
+        <p style="text-align:center;margin-top:20px"><a href="/" style="color:var(--text3);font-size:0.82rem"><i class="fas fa-arrow-left" style="margin-right:4px"></i> Back to
+            Home</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div class="modal-overlay" id="alert-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="alert-title">Notice</h2><button class="modal-close" onclick="closeAlert()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="alert-msg" style="color:var(--text2);font-size:0.93rem;line-height:1.6"></p>
+        <button class="btn btn-tt" style="width:100%" onclick="closeAlert()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let _alertCb = null;
+    function switchTab(t) {
+      document.querySelectorAll('.auth-tab').forEach((el, i) => el.classList.toggle('active', ['login', 'register', 'tourist'][i] === t));
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + t).classList.add('active');
+    }
+    function showAlert(title, msg, cb = null) {
+      document.getElementById('alert-title').textContent = title;
+      document.getElementById('alert-msg').textContent = msg;
+      _alertCb = cb; document.getElementById('alert-modal').classList.add('open');
+    }
+    function closeAlert() { document.getElementById('alert-modal').classList.remove('open'); if (_alertCb) { _alertCb(); _alertCb = null; } }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('l-user').value, password: document.getElementById('l-pass').value }) });
+      const d = await r.json();
+      r.ok ? showAlert('Welcome back!', d.message, () => window.location.href = '/user') : showAlert('Login Failed', d.error);
+    }
+    async function handleRegister(e) {
+      e.preventDefault();
+      const r = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('r-user').value, password: document.getElementById('r-pass').value, email: document.getElementById('r-email').value, phone: document.getElementById('r-phone').value, gender: document.getElementById('r-gender').value, bio: document.getElementById('r-bio').value }) });
+      const d = await r.json();
+      r.ok ? showAlert('Welcome to SAFAR! 🎉', d.message, () => window.location.href = '/user') : showAlert('Registration Failed', d.error);
+    }
+    async function sendTouristOTP(e) {
+      e.preventDefault();
+      const r = await fetch('/api/otp/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: document.getElementById('t-phone').value }) });
+      const d = await r.json();
+      if (r.ok) { document.getElementById('t-step1').classList.add('hidden'); document.getElementById('t-step2').classList.remove('hidden'); }
+      else showAlert('Error', d.error);
+    }
+    async function verifyTouristOTP(e) {
+      e.preventDefault();
+      const phone = document.getElementById('t-phone').value;
+      const v = await fetch('/api/otp/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, otp: document.getElementById('t-otp').value }) });
+      if (!v.ok) { const d = await v.json(); showAlert('OTP Error', d.error); return; }
+      const reg = await fetch('/api/safety/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('t-name').value, phone, kyc_id: document.getElementById('t-kyc-id').value, kyc_type: document.getElementById('t-kyc-type').value, visit_duration_days: parseInt(document.getElementById('t-dur').value) }) });
+      const d = await reg.json();
+      reg.ok ? showAlert('Welcome to SAFAR! 🛡️', 'Your safety profile has been created.', () => window.location.href = '/safety') : showAlert('Error', d.error);
+    }
+    if (window.location.search.includes('register')) switchTab('register');
+  </script>
+</body>
+
+</html>

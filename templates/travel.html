@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Travel Assistant — SAFAR</title>
+  <meta name="description" content="SAFAR AI — your personal travel assistant for destinations, safety tips, group travel advice, and personalized itinerary planning.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body class="travel-page">
+  <nav class="navbar" id="main-nav">
+    <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+    <div class="nav-links" id="nav-links">
+      <a href="/">Home</a><a href="/groups">Groups</a><a href="/travel" class="active">AI Assistant</a><a
+        href="/about">About</a>
+      <div class="nav-divider"></div>
+      {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/safety" class="nav-badge ast">🛡️
+        Safety</a><a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+      {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth"
+        class="btn-nav btn-nav-fill">Get Started</a>{% endif %}
+    </div>
+    <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+  </nav>
+
+  <div class="travel-hero">
+    <div class="travel-hero-text">
+      <span class="section-tag section-tag-tt">AI-Powered</span>
+      <h1>Your Personal Travel Intelligence</h1>
+      <p>Ask about destinations, get AI-curated itineraries, understand safety tools, or plan your next group trip — SAFAR AI is ready to help you travel smarter.</p>
+      <button class="btn btn-tt btn-lg"
+        onclick="document.getElementById('chatbot-panel').classList.add('open');document.getElementById('chatbot-input').focus()">
+        <i class="fas fa-robot"></i> Start Chatting Now →
+      </button>
+    </div>
+    <div class="travel-visual">🤖</div>
+  </div>
+
+  <!-- Quick Action Cards -->
+  <section style="padding: 0 0 60px;">
+    <div class="section-header">
+      <span class="section-tag section-tag-tt">Quick Actions</span>
+      <h2>How Can I Help You?</h2>
+      <p>Pick a topic or ask me anything in the chat</p>
+    </div>
+    <div class="travel-actions">
+      <div class="travel-action-card" id="ta-destinations" onclick="askBot('Tell me about the most popular travel destinations in India')">
+        <span class="ta-icon">🗺️</span>
+        <h4>Explore Destinations</h4>
+        <p>Discover the best places to visit across India with insider tips</p>
+      </div>
+      <div class="travel-action-card" id="ta-safety" onclick="askBot('What safety tips should I know while traveling in India?')">
+        <span class="ta-icon">🛡️</span>
+        <h4>Safety Tips</h4>
+        <p>Learn how to stay safe with SAFAR's real-time safety features</p>
+      </div>
+      <div class="travel-action-card" id="ta-groups" onclick="askBot('How do I create or join a travel group on SAFAR?')">
+        <span class="ta-icon">👥</span>
+        <h4>Travel Squads</h4>
+        <p>Get help creating, joining, and managing your travel groups</p>
+      </div>
+      <div class="travel-action-card" id="ta-planning" onclick="askBot('Help me plan a 5-day trip to Manali')">
+        <span class="ta-icon">📋</span>
+        <h4>Trip Planning</h4>
+        <p>Let AI craft a personalized itinerary for your next adventure</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending Destinations -->
+  <section style="padding: 0 0 80px;">
+    <div class="section-header" style="margin-bottom:24px;">
+      <h2 style="font-size:1.3rem;">🔥 Trending Destinations</h2>
+    </div>
+    <div class="trending-dests">
+      <a href="/groups" class="trending-dest-chip">
+        <img src="/static/images/dest_manali.png" alt="Manali"> Manali
+      </a>
+      <a href="/groups" class="trending-dest-chip">
+        <img src="/static/images/dest_goa.png" alt="Goa"> Goa
+      </a>
+      <a href="/groups" class="trending-dest-chip">
+        <img src="/static/images/dest_jaipur.png" alt="Jaipur"> Jaipur
+      </a>
+      <a href="/groups" class="trending-dest-chip">
+        <img src="/static/images/dest_kerala.png" alt="Kerala"> Kerala
+      </a>
+      <a href="/groups" class="trending-dest-chip">
+        <img src="/static/images/dest_varanasi.png" alt="Varanasi"> Varanasi
+      </a>
+      <a href="/groups" class="trending-dest-chip">🏔️ Ladakh</a>
+      <a href="/groups" class="trending-dest-chip">🏛️ Agra</a>
+      <a href="/groups" class="trending-dest-chip">⛰️ Shimla</a>
+    </div>
+  </section>
+
+  <!-- Footer V2 -->
+  <footer class="footer-v2">
+    <div class="footer-v2-grid">
+      <div class="footer-v2-brand">
+        <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+        <p>India's first AI-powered group travel platform with real-time tourist safety.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="footer-v2-col">
+        <h4>Quick Links</h4>
+        <a href="/">Home</a><a href="/groups">Find Groups</a><a href="/travel">AI Assistant</a><a href="/about">About Us</a>
+      </div>
+      <div class="footer-v2-col">
+        <h4>Safety</h4>
+        <a href="/safety">Safety Dashboard</a><a href="/auth">Register Tourist</a>
+      </div>
+      <div class="footer-v2-col">
+        <h4>Resources</h4>
+        <a href="#">Travel Tips</a><a href="#">Emergency Contacts</a>
+      </div>
+    </div>
+    <div class="footer-v2-bottom">
+      <p>© 2025 SAFAR — Built with ❤️ by Team Safar</p>
+    </div>
+  </footer>
+
+  <!-- Chatbot -->
+  <button class="chatbot-fab" id="chatbot-fab">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+    </svg>
+  </button>
+  <div class="chatbot-panel open" id="chatbot-panel">
+    <div class="chatbot-header">
+      <h3>🤖 SAFAR AI</h3>
+      <div class="chatbot-header-btns">
+        <button id="chatbot-clear">↺</button>
+        <button id="chatbot-close">✕</button>
+      </div>
+    </div>
+    <div class="chatbot-messages" id="chatbot-msgs">
+      <div class="chat-msg bot">
+        <p>✈️ Hi! I'm SAFAR AI. I can help with destinations, travel planning, safety information, and group travel. What would you like to know?</p>
+      </div>
+    </div>
+    <div class="chatbot-input-row">
+      <input type="text" id="chatbot-input" placeholder="Ask me anything about travel...">
+      <button class="chatbot-send" id="chatbot-send">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <script src="/static/script.js"></script>
+  <script>
+  function askBot(question) {
+    const panel = document.getElementById('chatbot-panel');
+    const input = document.getElementById('chatbot-input');
+    panel.classList.add('open');
+    input.value = question;
+    input.focus();
+    document.getElementById('chatbot-send').click();
+  }
+  </script>
+</body>
+
+</html>

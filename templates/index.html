@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SAFAR — Travel Smart. Travel Safe. Travel Together.</title>
+    <meta name="description" content="SAFAR is India's first AI-powered group travel platform with real-time tourist safety — plan trips, join travel communities, and explore with confidence.">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body class="home-page">
+    <nav class="navbar" id="main-nav">
+        <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+        <div class="nav-links" id="nav-links">
+            <a href="/" class="active">Home</a><a href="/groups">Groups</a><a href="/travel">AI Assistant</a><a
+                href="/about">About</a>
+            <div class="nav-divider"></div>
+            {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/safety"
+                class="nav-badge ast">🛡️ Safety</a><a href="/api/auth/logout"
+                class="btn-nav btn-nav-outline">Logout</a>
+            {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth"
+                class="btn-nav btn-nav-fill">Get Started</a>{% endif %}
+        </div>
+        <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+    </nav>
+
+    <!-- ═══════ HERO WITH SEARCH WIDGET ═══════ -->
+    <section class="hero-v2" id="hero-section">
+        <div class="hero-v2-bg">
+            <img src="/static/images/hero_bg.png" alt="Travel destinations">
+            <div class="hero-v2-overlay"></div>
+        </div>
+        <div class="hero-v2-content">
+            <div class="hero-v2-left">
+                <span class="section-tag section-tag-tt">✈️ India's Smartest Travel Platform</span>
+                <h1>Travel Smart.<br><span class="tt-text">Travel Safe.</span><br><span class="ast-text">Travel Together.</span></h1>
+                <p>SAFAR combines AI-powered group travel with real-time tourist safety — discover destinations, build your travel squad, and explore India with confidence.</p>
+                <div class="hero-v2-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num" data-target="500">0</span>+
+                        <span class="hero-stat-label">Travelers</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num" data-target="50">0</span>+
+                        <span class="hero-stat-label">Groups</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num" data-target="17">0</span>
+                        <span class="hero-stat-label">Safety Zones</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-v2-right">
+                <!-- Yatra-style tabbed search widget -->
+                <div class="search-widget" id="search-widget">
+                    <div class="sw-tabs">
+                        <button class="sw-tab active" data-tab="sw-groups" id="sw-tab-groups">
+                            <i class="fas fa-users"></i>
+                            <span>Groups</span>
+                        </button>
+                        <button class="sw-tab" data-tab="sw-destinations" id="sw-tab-destinations">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Destinations</span>
+                        </button>
+                        <button class="sw-tab" data-tab="sw-safety" id="sw-tab-safety">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Safety</span>
+                        </button>
+                    </div>
+                    <!-- Groups Panel -->
+                    <div class="sw-panel active" id="sw-groups">
+                        <div class="sw-form">
+                            <div class="sw-field">
+                                <label>Where are you heading?</label>
+                                <input type="text" id="sw-dest-input" placeholder="e.g. Manali, Goa, Jaipur...">
+                            </div>
+                            <div class="sw-field-row">
+                                <div class="sw-field">
+                                    <label>Group Type</label>
+                                    <select id="sw-type-select">
+                                        <option value="All">All Types</option>
+                                        <option value="Public">Public</option>
+                                        <option value="Private">Private</option>
+                                    </select>
+                                </div>
+                                <div class="sw-field">
+                                    <label>Members</label>
+                                    <select id="sw-size-select">
+                                        <option value="any">Any Size</option>
+                                        <option value="small">1-5</option>
+                                        <option value="medium">6-15</option>
+                                        <option value="large">16+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <a href="/groups" class="btn btn-tt sw-submit" id="sw-search-btn">
+                                <i class="fas fa-search"></i> Find Travel Groups
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Destinations Panel -->
+                    <div class="sw-panel" id="sw-destinations">
+                        <div class="sw-form">
+                            <div class="sw-field">
+                                <label>Explore Destinations</label>
+                                <input type="text" placeholder="Search cities, landmarks, states...">
+                            </div>
+                            <div class="sw-popular-tags">
+                                <span class="sw-tag">🏔️ Manali</span>
+                                <span class="sw-tag">🏖️ Goa</span>
+                                <span class="sw-tag">🏰 Jaipur</span>
+                                <span class="sw-tag">🌴 Kerala</span>
+                                <span class="sw-tag">🕌 Varanasi</span>
+                                <span class="sw-tag">🏔️ Ladakh</span>
+                            </div>
+                            <a href="/groups" class="btn btn-tt sw-submit">
+                                <i class="fas fa-compass"></i> Browse Destinations
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Safety Panel -->
+                    <div class="sw-panel" id="sw-safety">
+                        <div class="sw-form">
+                            <div class="sw-field">
+                                <label>Check Safety Score</label>
+                                <input type="text" placeholder="Enter your current location...">
+                            </div>
+                            <div class="sw-safety-info">
+                                <div class="sw-safety-item safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>17 monitored safety zones across India</span>
+                                </div>
+                                <div class="sw-safety-item safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Real-time GPS tracking & anomaly detection</span>
+                                </div>
+                                <div class="sw-safety-item safe">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>One-tap panic button with instant alerts</span>
+                                </div>
+                            </div>
+                            <a href="/safety" class="btn btn-ast sw-submit">
+                                <i class="fas fa-shield-alt"></i> Open Safety Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ POPULAR DESTINATIONS ═══════ -->
+    <section class="destinations-section" id="destinations-section">
+        <div class="section-header">
+            <span class="section-tag section-tag-tt">Explore India</span>
+            <h2>Popular Destinations</h2>
+            <p>Join travel squads headed to India's most loved destinations</p>
+        </div>
+        <div class="dest-grid">
+            <a href="/groups" class="dest-card dest-card-lg" id="dest-card-manali">
+                <img src="/static/images/dest_manali.png" alt="Manali" loading="lazy">
+                <div class="dest-card-overlay">
+                    <span class="dest-card-tag">🏔️ Adventure</span>
+                    <h3>Manali</h3>
+                    <p>Himalayan paradise for adventure seekers</p>
+                    <span class="dest-card-cta">Explore Groups →</span>
+                </div>
+            </a>
+            <a href="/groups" class="dest-card" id="dest-card-goa">
+                <img src="/static/images/dest_goa.png" alt="Goa" loading="lazy">
+                <div class="dest-card-overlay">
+                    <span class="dest-card-tag">🏖️ Beach</span>
+                    <h3>Goa</h3>
+                    <p>Sun, sand & unforgettable vibes</p>
+                    <span class="dest-card-cta">Explore Groups →</span>
+                </div>
+            </a>
+            <a href="/groups" class="dest-card" id="dest-card-jaipur">
+                <img src="/static/images/dest_jaipur.png" alt="Jaipur" loading="lazy">
+                <div class="dest-card-overlay">
+                    <span class="dest-card-tag">🏰 Heritage</span>
+                    <h3>Jaipur</h3>
+                    <p>The Pink City's royal grandeur</p>
+                    <span class="dest-card-cta">Explore Groups →</span>
+                </div>
+            </a>
+            <a href="/groups" class="dest-card" id="dest-card-kerala">
+                <img src="/static/images/dest_kerala.png" alt="Kerala" loading="lazy">
+                <div class="dest-card-overlay">
+                    <span class="dest-card-tag">🌴 Nature</span>
+                    <h3>Kerala</h3>
+                    <p>God's own country — backwaters & tea gardens</p>
+                    <span class="dest-card-cta">Explore Groups →</span>
+                </div>
+            </a>
+            <a href="/groups" class="dest-card dest-card-lg" id="dest-card-varanasi">
+                <img src="/static/images/dest_varanasi.png" alt="Varanasi" loading="lazy">
+                <div class="dest-card-overlay">
+                    <span class="dest-card-tag">🕌 Spiritual</span>
+                    <h3>Varanasi</h3>
+                    <p>Ancient ghats & sacred Ganges</p>
+                    <span class="dest-card-cta">Explore Groups →</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ═══════ FEATURES / WHY CHOOSE US ═══════ -->
+    <section class="features-section" id="features-section">
+        <div class="section-header">
+            <span class="section-tag section-tag-tt">The SAFAR Advantage</span>
+            <h2>Everything You Need for Smart Travel</h2>
+            <p>One platform. Group planning. AI safety. Real-time tracking.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" id="feature-group-travel">
+                <div class="feature-icon"><i class="fas fa-plane-departure"></i></div>
+                <h3>Travel Squads</h3>
+                <p>Create or join travel groups, plan destinations together, and stay connected with real-time group chat.</p>
+            </div>
+            <div class="feature-card" id="feature-tourist-safety">
+                <div class="feature-icon icon-ast"><i class="fas fa-shield-alt"></i></div>
+                <h3>Tourist Safety</h3>
+                <p>Real-time GPS tracking, geo-fenced safety zones, anomaly detection, and a one-tap panic button.</p>
+            </div>
+            <div class="feature-card" id="feature-ai-assistant">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Travel Assistant</h3>
+                <p>Get personalized travel recommendations, safety tips, and destination insights from our AI engine.</p>
+            </div>
+            <div class="feature-card" id="feature-geo-fencing">
+                <div class="feature-icon icon-ast"><i class="fas fa-map-pin"></i></div>
+                <h3>Smart Geo-Fencing</h3>
+                <p>Automatic safety scoring based on your location, with alerts when entering high-risk zones.</p>
+            </div>
+            <div class="feature-card" id="feature-panic-button">
+                <div class="feature-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3>Panic Button</h3>
+                <p>One-tap emergency alert that instantly notifies authorities with your real-time location.</p>
+            </div>
+            <div class="feature-card" id="feature-realtime-chat">
+                <div class="feature-icon"><i class="fas fa-comment-dots"></i></div>
+                <h3>Real-Time Chat</h3>
+                <p>Stay in touch with your travel squad through socket-powered instant messaging.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ SPECIAL OFFERS / BENEFITS ═══════ -->
+    <section class="offers-section" id="offers-section">
+        <div class="section-header">
+            <span class="section-tag section-tag-ast">Why SAFAR</span>
+            <h2>Built for Travelers, Backed by AI</h2>
+        </div>
+        <div class="offers-row">
+            <div class="offer-card" id="offer-free">
+                <div class="offer-badge">FREE</div>
+                <div class="offer-icon">🎉</div>
+                <h4>100% Free Platform</h4>
+                <p>No subscriptions, no hidden fees. Travel together without spending a rupee on the app.</p>
+            </div>
+            <div class="offer-card" id="offer-ai">
+                <div class="offer-badge">AI</div>
+                <div class="offer-icon">🤖</div>
+                <h4>AI-Powered Intelligence</h4>
+                <p>Our anomaly detection system monitors travel patterns and flags unusual activity in real time.</p>
+            </div>
+            <div class="offer-card" id="offer-verified">
+                <div class="offer-badge">KYC</div>
+                <div class="offer-icon">✅</div>
+                <h4>Verified Travelers</h4>
+                <p>Every tourist is KYC-verified with Aadhaar/Passport for a safe and trusted travel community.</p>
+            </div>
+            <div class="offer-card" id="offer-realtime">
+                <div class="offer-badge">LIVE</div>
+                <div class="offer-icon">📡</div>
+                <h4>Real-Time Everything</h4>
+                <p>Live GPS, live chat, live safety scores — every feature updates instantly.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ CTA BANNER ═══════ -->
+    <section class="cta-banner" id="cta-section">
+        <div class="cta-banner-content">
+            <h2>Ready for Your Next Adventure?</h2>
+            <p>Join thousands of travelers who explore India smartly and safely with SAFAR.</p>
+            <div class="cta-banner-btns">
+                <a href="/auth" class="btn btn-tt btn-lg">Start Your Journey — Free</a>
+                <a href="/travel" class="btn btn-ghost btn-lg">🤖 Talk to AI Assistant</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ ENHANCED FOOTER ═══════ -->
+    <footer class="footer-v2" id="main-footer">
+        <div class="footer-v2-grid">
+            <div class="footer-v2-brand">
+                <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+                <p>India's first AI-powered group travel platform with real-time tourist safety. Plan smart, travel safe.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link" id="social-twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link" id="social-instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link" id="social-linkedin"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-link" id="social-github"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-v2-col">
+                <h4>Quick Links</h4>
+                <a href="/">Home</a>
+                <a href="/groups">Find Groups</a>
+                <a href="/travel">AI Assistant</a>
+                <a href="/about">About Us</a>
+            </div>
+            <div class="footer-v2-col">
+                <h4>Safety</h4>
+                <a href="/safety">Safety Dashboard</a>
+                <a href="/admin">Admin Panel</a>
+                <a href="/auth">Register Tourist</a>
+                <a href="#">Safety Zones</a>
+            </div>
+            <div class="footer-v2-col">
+                <h4>Resources</h4>
+                <a href="#">Travel Tips</a>
+                <a href="#">Emergency Contacts</a>
+                <a href="#">KYC Guidelines</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+        </div>
+        <div class="footer-v2-bottom">
+            <p>© 2025 SAFAR — Built with ❤️ by Team Safar</p>
+        </div>
+    </footer>
+
+    <!-- Chatbot -->
+    <button class="chatbot-fab" id="chatbot-fab">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+        </svg>
+    </button>
+    <div class="chatbot-panel" id="chatbot-panel">
+        <div class="chatbot-header">
+            <h3>🤖 SAFAR AI</h3>
+            <div class="chatbot-header-btns">
+                <button id="chatbot-clear">↺</button>
+                <button id="chatbot-close">✕</button>
+            </div>
+        </div>
+        <div class="chatbot-messages" id="chatbot-msgs">
+            <div class="chat-msg bot">
+                <p>✈️ Hi! I'm your SAFAR AI assistant. How can I help you plan your next trip?</p>
+            </div>
+        </div>
+        <div class="chatbot-input-row">
+            <input type="text" id="chatbot-input" placeholder="Ask me anything about travel...">
+            <button class="chatbot-send" id="chatbot-send">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+    // ── Search Widget Tab Switching ──
+    document.querySelectorAll('.sw-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.sw-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sw-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ── Animated Counters ──
+    function animateCounters() {
+        document.querySelectorAll('.hero-stat-num').forEach(el => {
+            const target = parseInt(el.dataset.target);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    el.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(current);
+                }
+            }, 16);
+        });
+    }
+
+    // ── Intersection Observer for animations ──
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                if (entry.target.id === 'hero-section') animateCounters();
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.hero-v2, .destinations-section, .features-section, .offers-section, .cta-banner').forEach(s => observer.observe(s));
+
+    // ── Destination card parallax on hover ──
+    document.querySelectorAll('.dest-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+            const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+            card.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg) translateY(-8px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
+    </script>
+</body>
+
+</html>

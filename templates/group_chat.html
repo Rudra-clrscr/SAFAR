@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{group_name}} — Chat</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="chat-page" data-group-id="{{group_id}}" data-username="{{username}}">
+
+<nav class="navbar">
+  <a href="/groups" class="nav-logo" style="font-size:1.1rem">← Back to Groups</a>
+  <div class="nav-links" id="nav-links">
+    <a href="/user" class="nav-badge">👤 {{username}}</a>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+  </div>
+  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="chat-layout">
+  <!-- Sidebar: members -->
+  <aside class="chat-sidebar">
+    <div class="chat-sidebar-header">
+      <h3>Group Chat</h3>
+      <p>{{group_name}}</p>
+    </div>
+    <div class="chat-members" id="chat-members">
+      {% for m in members %}
+      <div class="member-chip">
+        <div class="member-avatar avatar-tt">{{m.username[0]|upper}}</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:600">{{m.username}}</div>
+          <div style="font-size:0.72rem;color:var(--text3)">{{m.role}}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- Main chat -->
+  <div class="chat-main">
+    <div class="chat-header">
+      <div>
+        <h2>{{group_name}}</h2>
+        <span style="font-size:0.8rem;color:var(--text2)">📍 {{destination_name or 'No destination'}}</span>
+      </div>
+      <span class="badge badge-tt">{{member_count}} members</span>
+    </div>
+
+    <div class="chat-messages" id="messages">
+      {% for msg in messages %}
+      <div class="msg-row {{'sent' if msg.sender_name == username else 'received'}}">
+        <div class="msg-avatar">{{msg.sender_name[0]|upper}}</div>
+        <div>
+          {% if msg.sender_name != username %}<div class="msg-name">{{msg.sender_name}}</div>{% endif %}
+          <div class="msg-bubble">{{msg.message}}</div>
+          <div class="msg-time">{{msg.timestamp}}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="chat-input-bar">
+      <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+      <button class="chat-send-btn" id="send-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script src="/static/group_chat.js"></script>
+</body></html>

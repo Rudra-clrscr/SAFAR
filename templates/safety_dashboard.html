@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Safety Dashboard — SAFAR</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="safety-page">
+<nav class="navbar" id="main-nav">
+  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+  <div class="nav-links" id="nav-links">
+    <a href="/">Home</a><a href="/groups">Groups</a><a href="/user" class="nav-badge">👤 {{tourist.name}}</a>
+    <a href="/safety" class="nav-badge ast active">🛡️ Safety</a>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+  </div>
+  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="safety-layout">
+  <!-- Header -->
+  <div class="card safety-header-card">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:4px 14px;border-radius:20px;margin-bottom:14px">
+      <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--ast)">🛡️ SAFAR Tourist Safety</span>
+    </div>
+    <h1>Welcome, <span>{{tourist.name}}</span></h1>
+    <div id="gps-status" class="gps-init">⏳ Initializing GPS...</div>
+  </div>
+
+  <!-- Map (full width) -->
+  <div class="card map-card">
+    <div id="userMap"></div>
+  </div>
+
+  <!-- Safety grid -->
+  <div class="safety-grid">
+    <!-- Score + details -->
+    <div class="card">
+      <h3 style="margin-bottom:20px;font-size:1rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Safety Score</h3>
+      <div style="display:flex;align-items:center;gap:22px">
+        <div class="score-ring {% if tourist.safety_score > 75 %}high{% elif tourist.safety_score > 40 %}medium{% else %}low{% endif %}" id="score-ring">
+          <span id="score-num">{{tourist.safety_score}}</span>
+          <span style="font-size:0.6rem;font-family:'DM Sans',sans-serif;font-weight:400">/100</span>
+        </div>
+        <div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:0.85rem"><span style="color:var(--text2)">Phone:</span> <strong>{{tourist.phone}}</strong></div>
+            <div style="font-size:0.85rem"><span style="color:var(--text2)">KYC:</span> <strong>{{tourist.kyc_type}} — {{tourist.kyc_id}}</strong></div>
+            <div style="font-size:0.85rem"><span style="color:var(--text2)">Visit ends:</span> <strong>{{tourist.visit_end_date.strftime('%d %b %Y')}}</strong></div>
+          </div>
+        </div>
+      </div>
+      <hr style="border:none;height:1px;background:var(--border);margin:18px 0">
+      <p style="font-size:0.72rem;color:var(--text3);word-break:break-all"><strong style="color:var(--text2)">Digital ID:</strong> {{tourist.digital_id[:40]}}...</p>
+    </div>
+
+    <!-- Panic button -->
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center">
+      <h3 style="font-size:1rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Emergency Alert</h3>
+      <button id="panic-btn">
+        <span style="font-size:1.5rem">🆘</span>
+        <span>PANIC</span>
+      </button>
+      <p style="font-size:0.78rem;color:var(--text3);max-width:200px;line-height:1.5">Tap to instantly alert authorities with your location</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+  <p>© 2025 Mini Project</p>
+</footer>
+
+<script src="/static/script.js"></script>
+<script>
+let userMap, userMarker;
+
+function initMap() {
+  userMap = L.map('userMap').setView([28.367, 79.43], 5);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CARTO © OpenStreetMap' }).addTo(userMap);
+  fetchZones();
+}
+
+async function fetchZones() {
+  const res = await fetch('/api/safety/zones');
+  const data = await res.json();
+  data.forEach(z => {
+    const color = z.regional_score > 80 ? '#4ade80' : z.regional_score > 60 ? '#60a5fa' : z.regional_score > 30 ? '#fb923c' : '#f87171';
+    L.circle([z.latitude, z.longitude], { color, fillColor: color, fillOpacity: 0.12, radius: z.radius * 1000 })
+      .addTo(userMap)
+      .bindPopup(`<b>${z.name}</b><br>Safety Score: ${z.regional_score}`);
+  });
+}
+
+async function sendLocation() {
+  if (!navigator.geolocation) {
+    setGPS('err', '❌ Geolocation not supported');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    if (userMap) {
+      userMap.setView([lat, lon], 14);
+      if (!userMarker) userMarker = L.marker([lat, lon]).addTo(userMap).bindPopup('Your location');
+      else userMarker.setLatLng([lat, lon]);
+    }
+    setGPS('ok', `✅ GPS Active — ${new Date().toLocaleTimeString()}`);
+    try {
+      const r = await fetch('/api/safety/update_location', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ latitude: lat, longitude: lon })
+      });
+      if (r.ok) {
+        const d = await r.json();
+        document.getElementById('score-num').textContent = d.safety_score;
+        const ring = document.getElementById('score-ring');
+        ring.className = 'score-ring ' + (d.safety_score > 75 ? 'high' : d.safety_score > 40 ? 'medium' : 'low');
+      }
+    } catch(e) { setGPS('err', '❌ Sync failed'); }
+  }, () => setGPS('err', '❌ GPS permission denied'), { enableHighAccuracy: true });
+}
+
+function setGPS(type, msg) {
+  const el = document.getElementById('gps-status');
+  el.textContent = msg;
+  el.className = 'gps-' + type;
+}
+
+document.getElementById('panic-btn').addEventListener('click', async () => {
+  if (!confirm('Send PANIC alert to authorities? This will set your safety score to 0.')) return;
+  try {
+    const r = await fetch('/api/safety/panic', { method: 'POST' });
+    if (r.ok) {
+      document.getElementById('score-num').textContent = '0';
+      document.getElementById('score-ring').className = 'score-ring low';
+      alert('🆘 Panic alert sent. Authorities have been notified.');
+    } else {
+      const d = await r.json();
+      alert('Failed: ' + (d.error || 'Unknown error'));
+    }
+  } catch(e) { alert('Network error'); }
+});
+
+window.onload = () => { initMap(); sendLocation(); setInterval(sendLocation, 15000); };
+</script>
+</body></html>

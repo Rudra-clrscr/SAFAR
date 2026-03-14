@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SAFAR — Authority Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="admin-page">
+<nav class="navbar">
+  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <span class="badge badge-ast">🛡️ Authority Dashboard</span>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- Stats row -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card card-ast"><div style="font-size:1.2rem">🧑‍💼</div><div class="stat-num tt-text" id="stat-tourists">—</div><div class="stat-label">Active Tourists</div></div>
+    <div class="stat-card"><div style="font-size:1.2rem">🔔</div><div class="stat-num" id="stat-alerts" style="color:var(--red)">—</div><div class="stat-label">Total Alerts</div></div>
+    <div class="stat-card"><div style="font-size:1.2rem">🤖</div><div class="stat-num" id="stat-anomalies" style="color:var(--ast)">—</div><div class="stat-label">Active Anomalies</div></div>
+    <div class="stat-card"><div style="font-size:1.2rem">⚡</div><div class="stat-num" id="stat-critical" style="color:var(--red)">—</div><div class="stat-label">Critical Score (&lt;40)</div></div>
+  </div>
+
+  <!-- Map -->
+  <div class="card"><div id="adminMap"></div></div>
+
+  <!-- Grid: tourists table + alerts -->
+  <div class="admin-grid">
+    <div class="card">
+      <h3 style="margin-bottom:16px;font-size:1rem">📡 Live Tourist Feed</h3>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Safety Score</th><th>Last Location</th><th>Visit Ends</th></tr></thead>
+          <tbody id="tourist-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card">
+        <h3 style="margin-bottom:14px;font-size:1rem">🤖 AI Anomalies</h3>
+        <div class="alerts-scroll" id="anomalies-list"><p style="color:var(--text3);font-size:0.85rem">Loading...</p></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;font-size:1rem">🔔 Alert History</h3>
+        <div class="alerts-scroll" id="alerts-list"><p style="color:var(--text3);font-size:0.85rem">Loading...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:0.78rem;color:var(--text3)">Auto-refreshes every 10 seconds. Last updated: <span id="last-updated">—</span></p>
+</div>
+
+<footer>
+  <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+  <p>© 2025 Mini Project</p>
+</footer>
+
+<script>
+const adminMap = L.map('adminMap').setView([22.57, 88.36], 5);
+let touristMarkers = L.layerGroup().addTo(adminMap);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CARTO', maxZoom: 20 }).addTo(adminMap);
+
+function parseLocation(s) {
+  if (!s) return null;
+  try {
+    const parts = s.split(',');
+    return [parseFloat(parts[0].split(':')[1]), parseFloat(parts[1].split(':')[1])];
+  } catch { return null; }
+}
+
+function scoreColor(s) { return s < 40 ? '#f87171' : s < 70 ? '#fbbf24' : '#4ade80'; }
+
+async function refresh() {
+  try {
+    const [tr, ar, an] = await Promise.all([
+      fetch('/api/admin/tourists').then(r=>r.json()),
+      fetch('/api/admin/alerts').then(r=>r.json()),
+      fetch('/api/admin/anomalies').then(r=>r.json())
+    ]);
+
+    // Stats
+    document.getElementById('stat-tourists').textContent = tr.length;
+    document.getElementById('stat-alerts').textContent = ar.length;
+    document.getElementById('stat-anomalies').textContent = an.filter(a=>a.anomaly_type?.includes('active')||true).length;
+    document.getElementById('stat-critical').textContent = tr.filter(t=>t.safety_score<40).length;
+
+    // Tourists table + map
+    touristMarkers.clearLayers();
+    const tbody = document.getElementById('tourist-tbody');
+    tbody.innerHTML = tr.map(t => {
+      const c = scoreColor(t.safety_score);
+      const loc = parseLocation(t.last_known_location);
+      if (loc) L.marker(loc).addTo(touristMarkers).bindPopup(`<b>${t.name}</b><br>Score: ${t.safety_score}`);
+      return `<tr>
+        <td>${t.name}</td>
+        <td><strong style="color:${c}">${t.safety_score}/100</strong></td>
+        <td style="font-family:monospace;font-size:0.78rem">${t.last_known_location||'N/A'}</td>
+        <td style="font-size:0.8rem">${t.visit_end_date?.slice(0,10)||'—'}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text3)">No tourists registered</td></tr>';
+
+    // Anomalies
+    const anEl = document.getElementById('anomalies-list');
+    anEl.innerHTML = an.length ? an.map(a => {
+      const isCrit = a.anomaly_type?.toLowerCase().includes('critical');
+      return `<div class="alert-item" style="border-color:${isCrit?'rgba(239,68,68,0.3)':'rgba(245,158,11,0.3)'}">
+        <div class="alert-item-header">
+          <strong style="color:${isCrit?'#f87171':'var(--ast)'}">${a.anomaly_type}</strong>
+          <time>${a.timestamp}</time>
+        </div>
+        <p><b>${a.tourist_name}</b> — ${a.description}</p>
+      </div>`;
+    }).join('') : '<p style="color:var(--text3);font-size:0.85rem">✅ No active anomalies</p>';
+
+    // Alerts
+    const alEl = document.getElementById('alerts-list');
+    alEl.innerHTML = ar.length ? ar.map(a => `
+      <div class="alert-item" style="border-color:rgba(239,68,68,0.25)">
+        <div class="alert-item-header">
+          <strong style="color:#f87171">${a.alert_type}</strong>
+          <time>${a.timestamp}</time>
+        </div>
+        <p><b>${a.tourist_name}</b> — ${a.location||'N/A'}</p>
+      </div>`
+    ).join('') : '<p style="color:var(--text3);font-size:0.85rem">No alerts recorded</p>';
+
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+  } catch(e) { console.error('Dashboard refresh failed:', e); }
+}
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body></html>

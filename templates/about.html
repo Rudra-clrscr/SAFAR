@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About Us — SAFAR</title>
+  <meta name="description" content="Meet the team behind SAFAR — India's first AI-powered group travel platform combining social travel with real-time tourist safety.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="about-page">
+<nav class="navbar" id="main-nav">
+  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+  <div class="nav-links" id="nav-links">
+    <a href="/">Home</a><a href="/groups">Groups</a><a href="/travel">AI Assistant</a><a href="/about" class="active">About</a>
+    <div class="nav-divider"></div>
+    {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/safety" class="nav-badge ast">🛡️ Safety</a><a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+    {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth" class="btn-nav btn-nav-fill">Get Started</a>{% endif %}
+  </div>
+  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="about-hero">
+  <span class="section-tag section-tag-tt">About SAFAR</span>
+  <h1>Redefining How India <span class="tt-text">Travels</span></h1>
+  <p>We believe travel should be social, smart, and safe. SAFAR is India's first platform that combines community-driven group travel with AI-powered tourist safety — so every journey is an adventure, not a worry.</p>
+</div>
+
+<!-- Mission Section -->
+<section style="padding: 0 5% 80px; position:relative; z-index:1;">
+  <div class="offers-row" style="max-width:1100px;">
+    <div class="offer-card" id="about-mission">
+      <div class="offer-icon">🎯</div>
+      <h4>Our Mission</h4>
+      <p>To make every trip in India safer and more social — connecting travelers through technology and community.</p>
+    </div>
+    <div class="offer-card" id="about-vision">
+      <div class="offer-icon">🔭</div>
+      <h4>Our Vision</h4>
+      <p>A world where every tourist — solo or in a group — can explore freely with complete peace of mind.</p>
+    </div>
+    <div class="offer-card" id="about-impact">
+      <div class="offer-icon">🌍</div>
+      <h4>Our Impact</h4>
+      <p>17 safety zones monitored, AI anomaly detection, KYC-verified travelers, and a growing community.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Team -->
+<section style="position:relative; z-index:1;">
+  <div class="section-header">
+    <span class="section-tag section-tag-tt">Our Team</span>
+    <h2>The Builders Behind SAFAR</h2>
+    <p>A passionate team turning a startup idea into reality</p>
+  </div>
+</section>
+
+<div class="team-grid">
+  <div class="team-card fade-in-up delay-1">
+    <div class="team-card-img-wrap"><img src="/static/images/aryan.jpg" alt="Aryan" onerror="this.style.background='var(--bg3)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.fontSize='3rem';this.innerHTML='👨‍💻'"></div>
+    <div class="team-card-body">
+      <h3>Aryan</h3>
+      <div class="team-card-role">Co-Founder & Full-Stack Lead</div>
+      <p>Weaving elegant code and infectious energy to sculpt intuitive, beautiful user journeys.</p>
+      <div class="social-links"><a href="#" class="social-link"><i class="fab fa-linkedin"></i></a><a href="#" class="social-link"><i class="fab fa-github"></i></a></div>
+    </div>
+  </div>
+  <div class="team-card fade-in-up delay-2">
+    <div class="team-card-img-wrap"><img src="/static/images/rachit.jpg" alt="Rachit" onerror="this.style.background='var(--bg3)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.fontSize='3rem';this.innerHTML='🗄️'"></div>
+    <div class="team-card-body">
+      <h3>Rachit</h3>
+      <div class="team-card-role">Database & Infrastructure</div>
+      <p>Guardian of the digital universe, ensuring every piece of data is perfectly structured and secure.</p>
+      <div class="social-links"><a href="#" class="social-link"><i class="fab fa-linkedin"></i></a><a href="#" class="social-link"><i class="fab fa-github"></i></a></div>
+    </div>
+  </div>
+  <div class="team-card fade-in-up delay-3">
+    <div class="team-card-img-wrap"><img src="/static/images/anurag.jpeg" alt="Anurag" onerror="this.style.background='var(--bg3)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.fontSize='3rem';this.innerHTML='🎨'"></div>
+    <div class="team-card-body">
+      <h3>Anurag</h3>
+      <div class="team-card-role">Frontend & Design</div>
+      <p>Translating creative vision into a living interface, crafting every pixel you see and touch.</p>
+      <div class="social-links"><a href="#" class="social-link"><i class="fab fa-linkedin"></i></a><a href="#" class="social-link"><i class="fab fa-github"></i></a></div>
+    </div>
+  </div>
+  <div class="team-card fade-in-up delay-1">
+    <div class="team-card-img-wrap"><img src="/static/images/dev.jpg" alt="Dev" onerror="this.style.background='var(--bg3)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.fontSize='3rem';this.innerHTML='🤖'"></div>
+    <div class="team-card-body">
+      <h3>Dev</h3>
+      <div class="team-card-role">AI & Machine Learning</div>
+      <p>The mind behind the machine, breathing intelligence into our AI assistant and anomaly detection engine.</p>
+      <div class="social-links"><a href="#" class="social-link"><i class="fab fa-linkedin"></i></a><a href="#" class="social-link"><i class="fab fa-github"></i></a></div>
+    </div>
+  </div>
+  <div class="team-card fade-in-up delay-2">
+    <div class="team-card-img-wrap"><img src="/static/images/rudra.jpg" alt="Rudra" onerror="this.style.background='var(--bg3)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.style.fontSize='3rem';this.innerHTML='⚙️'"></div>
+    <div class="team-card-body">
+      <h3>Rudra</h3>
+      <div class="team-card-role">Backend & Architecture</div>
+      <p>The powerhouse of the platform, engineering the robust engine that drives every feature.</p>
+      <div class="social-links"><a href="#" class="social-link"><i class="fab fa-linkedin"></i></a><a href="#" class="social-link"><i class="fab fa-github"></i></a></div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Banner -->
+<section class="cta-banner" style="padding-top:60px;">
+  <div class="cta-banner-content">
+    <h2>Join the SAFAR Movement</h2>
+    <p>Be part of India's smartest travel community — it's free to get started.</p>
+    <div class="cta-banner-btns">
+      <a href="/auth" class="btn btn-tt btn-lg">Get Started Free</a>
+      <a href="/groups" class="btn btn-ghost btn-lg">✈️ Explore Groups</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer V2 -->
+<footer class="footer-v2">
+  <div class="footer-v2-grid">
+    <div class="footer-v2-brand">
+      <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+      <p>India's first AI-powered group travel platform with real-time tourist safety.</p>
+      <div class="footer-social">
+        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+    <div class="footer-v2-col">
+      <h4>Quick Links</h4>
+      <a href="/">Home</a><a href="/groups">Find Groups</a><a href="/travel">AI Assistant</a><a href="/about">About Us</a>
+    </div>
+    <div class="footer-v2-col">
+      <h4>Safety</h4>
+      <a href="/safety">Safety Dashboard</a><a href="/auth">Register Tourist</a>
+    </div>
+    <div class="footer-v2-col">
+      <h4>Resources</h4>
+      <a href="#">Travel Tips</a><a href="#">Emergency Contacts</a>
+    </div>
+  </div>
+  <div class="footer-v2-bottom">
+    <p>© 2025 SAFAR — Built with ❤️ by Team Safar</p>
+  </div>
+</footer>
+<script src="/static/script.js"></script>
+</body></html>

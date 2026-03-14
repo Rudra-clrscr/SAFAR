@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Dashboard — SAFAR</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="udash-page">
+<nav class="navbar" id="main-nav">
+  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+  <div class="nav-links" id="nav-links">
+    <a href="/">Home</a><a href="/groups">Groups</a><a href="/travel">Travel Assistant</a><a href="/about">About</a>
+    <div class="nav-divider"></div>
+    <a href="/user" class="nav-badge active">👤 {{user.username}}</a>
+    <a href="/safety" class="nav-badge ast">🛡️ Safety</a>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+  </div>
+  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="udash-layout">
+  <!-- PROFILE CARD -->
+  <aside>
+    <div class="card profile-card">
+      <div class="profile-card-top">
+        <div class="profile-pic">{{user.username[0]|upper}}</div>
+        <div class="profile-name">{{user.username}}</div>
+        <div class="profile-email">{{user.email}}</div>
+      </div>
+      <div class="profile-fields">
+        <div class="profile-field"><span>📞 Phone</span><span>{{user.phone or 'Not set'}}</span></div>
+        <div class="profile-field"><span>🧑 Gender</span><span>{{user.gender or 'Not set'}}</span></div>
+        <div class="profile-field"><span>📅 Member since</span><span>{{user.created_at.strftime('%Y-%m-%d') if user.created_at else '—'}}</span></div>
+      </div>
+      {% if user.bio %}<div class="profile-bio">"{{user.bio}}"</div>{% endif %}
+      <button class="btn btn-ghost" style="width:100%;margin-top:18px" onclick="document.getElementById('edit-modal').classList.add('open')">✏️ Edit Profile</button>
+      {% if not user.tourist_profile %}
+      <a href="/auth?register#tourist" class="btn btn-ast btn-sm" style="width:100%;margin-top:9px;text-align:center">🛡️ Add Safety Profile</a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="font-size:1.6rem">👤 My Dashboard</h2>
+
+    <!-- Current group -->
+    <div class="card my-group-card">
+      {% if group %}
+        <h4>📌 My Current Group: {{group.group_name}}</h4>
+        <div class="group-card-meta" style="margin-bottom:12px">
+          <span>📍 {{group.destination_name or 'No destination'}}</span>
+          <span>👥 {{group.member_count}} members</span>
+          <span class="badge {{'badge-tt' if group.group_type == 'Public' else 'badge-ast'}}">{{group.group_type}}</span>
+        </div>
+        <p style="color:var(--text2);font-size:0.9rem;margin-bottom:18px">{{group.group_description or 'No description.'}}</p>
+        <hr style="border:none;height:1px;background:var(--border);margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h5 style="font-size:0.9rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px">Members</h5>
+          <a href="/groups/chat/{{group.group_id}}" class="btn btn-tt btn-sm">💬 Open Chat</a>
+        </div>
+        <ul class="members-list">
+          {% for m in members %}
+          <li class="member-item">
+            <div class="member-avatar avatar-tt">{{m.username[0]|upper}}</div>
+            <div class="member-item-info"><strong>{{m.username}}</strong><span>{{m.role}}</span></div>
+          </li>
+          {% endfor %}
+        </ul>
+        <a href="/groups/leave/{{group.group_id}}" class="btn btn-danger btn-sm" style="margin-top:16px">🚪 Leave Group</a>
+      {% else %}
+        <div style="text-align:center;padding:40px;border:1px dashed var(--border);border-radius:var(--radius2)">
+          <p style="font-size:2.5rem;margin-bottom:12px">✈️</p>
+          <h3 style="color:var(--tt)">Not in a group yet</h3>
+          <p style="color:var(--text2);margin:10px 0 20px">Join or create a group to start your next adventure!</p>
+          <a href="/groups" class="btn btn-tt">Find a Group</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+  <p>© 2025 Mini Project</p>
+</footer>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header"><h2>Edit Profile</h2><button class="modal-close" onclick="document.getElementById('edit-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body">
+      <form action="/user/edit" method="POST" style="display:flex;flex-direction:column;gap:14px">
+        <div class="form-group"><label>Phone</label><input type="tel" name="phone_no" value="{{user.phone or ''}}" placeholder="Your phone number"></div>
+        <div class="form-group"><label>Gender</label>
+          <select name="gender">
+            <option value="" {% if not user.gender %}selected{% endif %}>Prefer not to say</option>
+            <option value="Male" {% if user.gender=='Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if user.gender=='Female' %}selected{% endif %}>Female</option>
+            <option value="Other" {% if user.gender=='Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Bio</label><textarea name="bio" placeholder="Tell us about yourself...">{{user.bio or ''}}</textarea></div>
+        <button type="submit" class="btn btn-tt" style="width:100%">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body></html>
