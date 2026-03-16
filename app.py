@@ -684,7 +684,12 @@ def api_send_otp():
             )
         except Exception as e:
             print(f"Twilio error: {e}")
-            return jsonify({'error': 'Failed to send OTP via SMS.'}), 500
+            print(f"[DEV FALLBACK] OTP for {phone}: {otp}")
+            return jsonify({
+                'error': f'Twilio failed: {str(e)}', 
+                'dev_otp': otp,
+                'message': 'Failed to send SMS, but OTP generated for terminal.'
+            }), 200
     else:
         # Dev mode: print OTP to console instead of sending SMS
         print(f"[DEV] OTP for {phone}: {otp}")
