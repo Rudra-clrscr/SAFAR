@@ -41,6 +41,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///combined_app.db')
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -1263,11 +1265,17 @@ def run_server(host='0.0.0.0', port=5000, debug=False):
     socketio.run(app, host=host, port=port, debug=debug)
 
 
-if __name__ == '__main__':
-    def anomaly_loop():
-        while True:
+def anomaly_loop():
+    while True:
+        try:
             check_for_anomalies()
-            time.sleep(300)
+        except Exception as e:
+            print(f"Anomaly loop error: {e}")
+        time.sleep(300)
 
-    threading.Thread(target=anomaly_loop, daemon=True).start()
+# Start anomaly detection thread globally for production deployments
+threading.Thread(target=anomaly_loop, daemon=True).start()
+
+
+if __name__ == '__main__':
     run_server(debug=True)
