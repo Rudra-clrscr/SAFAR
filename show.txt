@@ -1,0 +1,8 @@
+﻿commit ae08458caed4186dc57e48def97e391086b5e849
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Tue Mar 17 03:23:00 2026 +0530
+
+    Allow multiple accounts with same phone and email
+
+app.py
+database.py

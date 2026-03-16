@@ -1,0 +1,8 @@
+﻿commit 54c8ff981a54d08f666f290a0b309aa15bf616d6
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Tue Mar 17 00:03:56 2026 +0530
+
+    commit - 3.2
+
+app.py
+templates/auth.html

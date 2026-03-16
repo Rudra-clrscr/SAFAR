@@ -1,0 +1,29 @@
+﻿commit ae08458caed4186dc57e48def97e391086b5e849
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Tue Mar 17 03:23:00 2026 +0530
+
+    Allow multiple accounts with same phone and email
+
+commit 54c8ff981a54d08f666f290a0b309aa15bf616d6
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Tue Mar 17 00:03:56 2026 +0530
+
+    commit - 3.2
+
+commit 396155f7046ae8d377eb077569ae1bbbc3eeef62
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Mon Mar 16 23:59:00 2026 +0530
+
+    Fix scikit-learn render deployment issues
+
+commit 5b582aa302d2921fba5c63788773c5440e29624e
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Mon Mar 16 23:51:52 2026 +0530
+
+    commit -3.1
+
+commit 3666e10f64f0b6265a6da18ce4cd46460a72c14c
+Author: Rudra-clrscr <rpsbareilly06@gmail.com>
+Date:   Mon Mar 16 23:40:55 2026 +0530
+
+    commit - 3
