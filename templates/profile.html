@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Safety Dashboard — SAFAR</title>
+  <title>User Profile — SAFAR</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -11,8 +11,8 @@
 <nav class="navbar" id="main-nav">
   <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
   <div class="nav-links" id="nav-links">
-    <a href="/">Home</a><a href="/groups">Groups</a><a href="/user" class="nav-badge">👤 {{tourist.name}}</a>
-    <a href="/safety" class="nav-badge ast active">🛡️ Safety</a>
+    <a href="/">Home</a><a href="/groups">Groups</a>
+    <a href="/profile" class="nav-badge ast active">👤 User Profile</a>
     <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
   </div>
   <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
@@ -22,7 +22,7 @@
   <!-- Header -->
   <div class="card safety-header-card">
     <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:4px 14px;border-radius:20px;margin-bottom:14px">
-      <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--ast)">🛡️ SAFAR Tourist Safety</span>
+      <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--ast)">🛡️ SAFAR User Profile</span>
     </div>
     <h1>Welcome, <span>{{tourist.name}}</span></h1>
     <div id="gps-status" class="gps-init">⏳ Initializing GPS...</div>

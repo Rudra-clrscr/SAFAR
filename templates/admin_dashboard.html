@@ -119,15 +119,20 @@ async function refresh() {
 
     // Alerts
     const alEl = document.getElementById('alerts-list');
-    alEl.innerHTML = ar.length ? ar.map(a => `
-      <div class="alert-item" style="border-color:rgba(239,68,68,0.25)">
+    alEl.innerHTML = ar.length ? ar.map(a => {
+      let icon = '🔔';
+      let title = a.alert_type;
+      if (title.includes('Panic')) { icon = '🆘'; title = 'SOS Signal (Panic)'; }
+      if (title.includes('Geo-fence')) { icon = '🚨'; title = 'Geo-Fencing Alert: ' + title.replace('Geo-fence Breach: ', ''); }
+      
+      return `<div class="alert-item" style="border-color:rgba(239,68,68,0.25)">
         <div class="alert-item-header">
-          <strong style="color:#f87171">${a.alert_type}</strong>
+          <strong style="color:#f87171">${icon} ${title}</strong>
           <time>${a.timestamp}</time>
         </div>
         <p><b>${a.tourist_name}</b> — ${a.location||'N/A'}</p>
       </div>`
-    ).join('') : '<p style="color:var(--text3);font-size:0.85rem">No alerts recorded</p>';
+    }).join('') : '<p style="color:var(--text3);font-size:0.85rem">No alerts recorded</p>';
 
     document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
   } catch(e) { console.error('Dashboard refresh failed:', e); }

@@ -19,3 +19,7 @@ python-dotenv==1.0.1
 
 # SMS (OTP alerts) — optional, gracefully handled if missing
 twilio==9.1.0
+
+# Anomaly Detection algorithm
+scikit-learn==1.3.2
+numpy==1.26.4

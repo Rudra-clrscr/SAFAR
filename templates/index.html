@@ -17,7 +17,7 @@
             <a href="/" class="active">Home</a><a href="/groups">Groups</a><a href="/travel">AI Assistant</a><a
                 href="/about">About</a>
             <div class="nav-divider"></div>
-            {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/safety"
+            {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/profile"
                 class="nav-badge ast">🛡️ Safety</a><a href="/api/auth/logout"
                 class="btn-nav btn-nav-outline">Logout</a>
             {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth"
@@ -141,7 +141,7 @@
                                     <span>One-tap panic button with instant alerts</span>
                                 </div>
                             </div>
-                            <a href="/safety" class="btn btn-ast sw-submit">
+                            <a href="/profile" class="btn btn-ast sw-submit">
                                 <i class="fas fa-shield-alt"></i> Open Safety Dashboard
                             </a>
                         </div>
@@ -316,7 +316,7 @@
             </div>
             <div class="footer-v2-col">
                 <h4>Safety</h4>
-                <a href="/safety">Safety Dashboard</a>
+                <a href="/profile">Safety Dashboard</a>
                 <a href="/admin">Admin Panel</a>
                 <a href="/auth">Register Tourist</a>
                 <a href="#">Safety Zones</a>

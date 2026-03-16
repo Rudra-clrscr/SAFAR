@@ -125,17 +125,45 @@ def find_or_create_destination(name: str) -> str | None:
 # ─────────────────────────────────────────────
 
 def check_for_anomalies():
-    """Flags tourists inactive for 10 / 20 minutes."""
+    """Flags tourists inactive or exhibiting abnormal patterns using Isolation Forest."""
     with app.app_context():
         now = datetime.utcnow()
         active = Tourist.query.filter(Tourist.visit_end_date > now).all()
         if not active:
             return
 
-        CRITICAL_SEC = 1200   # 20 min
-        WARNING_SEC  = 600    # 10 min
+        CRITICAL_SEC = 1200   # 20 min fallback
+        WARNING_SEC  = 600    # 10 min fallback
         ten_ago = now - timedelta(minutes=10)
 
+        data = []
+        for t in active:
+            idle = (now - t.last_updated_at).total_seconds()
+            score = t.safety_score
+            data.append([idle, score])
+
+        if len(data) >= 3:
+            try:
+                from sklearn.ensemble import IsolationForest
+                import numpy as np
+                X = np.array(data)
+                clf = IsolationForest(n_estimators=100, contamination=0.1, random_state=42)
+                preds = clf.fit_predict(X)
+                
+                for idx, t in enumerate(active):
+                    if preds[idx] == -1:  # Anomaly detected by Isolation Forest
+                        recent = Anomaly.query.filter(
+                            Anomaly.tourist_id == t.id,
+                            Anomaly.timestamp > ten_ago
+                        ).first()
+                        if not recent:
+                            idle_min = data[idx][0] / 60
+                            desc = f"AI Detected (Isolation Forest): Idle {idle_min:.1f}m, Score: {data[idx][1]}"
+                            db.session.add(Anomaly(tourist_id=t.id, anomaly_type="AI Behavioral Anomaly", description=desc))
+            except ImportError:
+                print("Missing scikit-learn for Isolation Forest, using fallback.")
+
+        # Fallback for simple inactivity
         for t in active:
             idle = (now - t.last_updated_at).total_seconds()
 
@@ -430,15 +458,15 @@ def destinations_delete(dest_id):
 
 
 # --- Astra Safety pages ---
-@app.route('/safety')
-def safety_dashboard_page():
+@app.route('/profile')
+def profile_page():
     user = get_current_user()
     if not user:
         return redirect(url_for('auth_page'))
     tourist = get_current_tourist()
     if not tourist:
         return redirect(url_for('auth_page'))
-    return render_template('safety_dashboard.html', user=user, tourist=tourist)
+    return render_template('profile.html', user=user, tourist=tourist)
 
 @app.route('/admin')
 def admin_dashboard_page():
@@ -571,7 +599,7 @@ def api_register():
         tourist = Tourist(
             user_id        = user.id,
             digital_id     = digital_id,
-            name           = data['username'],
+            name           = data.get('name') or data['username'],
             phone          = phone,
             kyc_id         = data['kyc_id'],
             kyc_type       = data['kyc_type'],
