@@ -1045,10 +1045,7 @@ def safety_register():
         if not data.get(f):
             return jsonify({'error': f'{f} is required.'}), 400
 
-    if Tourist.query.filter(
-        (Tourist.phone == data['phone']) | (Tourist.kyc_id == data['kyc_id'])
-    ).first():
-        return jsonify({'error': 'Phone or KYC ID already registered.'}), 409
+    # No unique restrictions on phone or kyc_id
 
     end_date  = datetime.utcnow() + timedelta(days=int(data['visit_duration_days']))
     unique_s  = f"{data['name']}:{data['kyc_id']}:{datetime.utcnow()}"
