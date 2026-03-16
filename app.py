@@ -580,17 +580,13 @@ def api_register():
         db.session.flush()   # get user.id before commit
     except Exception:
         db.session.rollback()
-        return jsonify({'error': 'Username or email already taken.'}), 409
+        return jsonify({'error': 'Username already taken.'}), 409
 
     # --- Optionally create Tourist profile ---
     tourist = None
     if data.get('kyc_id') and data.get('kyc_type') and data.get('visit_duration_days'):
         phone = data.get('phone') or ''
-        if Tourist.query.filter(
-            (Tourist.phone == phone) | (Tourist.kyc_id == data['kyc_id'])
-        ).first():
-            db.session.rollback()
-            return jsonify({'error': 'Phone or KYC ID already registered.'}), 409
+
 
         end_date      = datetime.utcnow() + timedelta(days=int(data['visit_duration_days']))
         unique_string = f"{data['username']}:{data['kyc_id']}:{datetime.utcnow()}"
@@ -639,7 +635,7 @@ def api_login():
         # Tourist phone-only login (OTP must have been verified separately)
         if not data.get('otp_verified'):
             return jsonify({'error': 'OTP verification required.'}), 403
-        tourist = Tourist.query.filter_by(phone=data['phone']).first()
+        tourist = Tourist.query.filter_by(phone=data['phone']).order_by(Tourist.id.desc()).first()
         if not tourist:
             return jsonify({'error': 'No tourist profile found for this number.'}), 404
         if tourist.user_id:

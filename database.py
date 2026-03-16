@@ -28,8 +28,8 @@ class User(db.Model):
     id          = db.Column(db.String(32), primary_key=True, default=generate_id)
     username    = db.Column(db.String(80), unique=True, nullable=False)
     password    = db.Column(db.String(256), nullable=False)   # store hashed
-    email       = db.Column(db.String(120), unique=True, nullable=False)
-    phone       = db.Column(db.String(20), unique=True)       # shared with Tourist
+    email       = db.Column(db.String(120), nullable=False)
+    phone       = db.Column(db.String(20))       # shared with Tourist
     gender      = db.Column(db.String(10))
     bio         = db.Column(db.Text)
     created_at  = db.Column(db.DateTime, default=datetime.utcnow)
@@ -125,8 +125,8 @@ class Tourist(db.Model):
     user_id             = db.Column(db.String(32), ForeignKey('users.id', ondelete='CASCADE'), unique=True)
     digital_id          = db.Column(db.String(128), unique=True, nullable=False)
     name                = db.Column(db.String(100), nullable=False)
-    phone               = db.Column(db.String(20), unique=True, nullable=False)
-    kyc_id              = db.Column(db.String(50), unique=True, nullable=False)
+    phone               = db.Column(db.String(20), nullable=False)
+    kyc_id              = db.Column(db.String(50), nullable=False)
     kyc_type            = db.Column(db.String(50), nullable=False)
     visit_end_date      = db.Column(db.DateTime, nullable=False)
     safety_score        = db.Column(db.Integer, default=100)
