@@ -40,11 +40,11 @@ from database import (
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql+psycopg2://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres?sslmode=require')
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql+pg8000://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres?sslmode=require')
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
-elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+psycopg2://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+pg8000://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
 
 if "?" not in DATABASE_URL and "sqlite" not in DATABASE_URL:
     DATABASE_URL += "?sslmode=require"

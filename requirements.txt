@@ -12,7 +12,7 @@ simple-websocket==1.0.0
 gunicorn==23.0.0
 
 # Database adapters
-psycopg2-binary==2.9.9
+pg8000>=1.31.2
 
 # Environment variables
 python-dotenv==1.0.1
