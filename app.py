@@ -42,7 +42,15 @@ app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///combined_app.db')
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+psycopg2://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+if "?" not in DATABASE_URL and "sqlite" not in DATABASE_URL:
+    DATABASE_URL += "?sslmode=require"
+elif "sqlite" not in DATABASE_URL and "sslmode=" not in DATABASE_URL:
+    DATABASE_URL += "&sslmode=require"
+
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -578,9 +586,11 @@ def api_register():
 
     try:
         db.session.flush()   # get user.id before commit
-    except Exception:
+    except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Username already taken.'}), 409
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Database Error: {e}'}), 409
 
     # --- Optionally create Tourist profile ---
     tourist = None
@@ -1299,8 +1309,11 @@ def anomaly_loop():
             print(f"Anomaly loop error: {e}")
         time.sleep(300)
 
-# Start anomaly detection thread globally for production deployments
-threading.Thread(target=anomaly_loop, daemon=True).start()
+@app.before_request
+def start_anomaly_thread():
+    if not hasattr(app, 'anomaly_thread_started'):
+        app.anomaly_thread_started = True
+        threading.Thread(target=anomaly_loop, daemon=True).start()
 
 
 if __name__ == '__main__':
