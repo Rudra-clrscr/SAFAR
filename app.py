@@ -52,6 +52,13 @@ if "sslmode=require" in DATABASE_URL:
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# pg8000 requires explicit ssl_context via connect_args for SSL connections (like Supabase)
+if "pg8000" in DATABASE_URL:
+    import ssl
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': {'ssl_context': ssl.create_default_context()}
+    }
+
 db.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins='*', async_mode='threading')
 
