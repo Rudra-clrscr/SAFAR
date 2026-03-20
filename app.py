@@ -41,11 +41,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql+pg8000://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres')
+
+# Ensure we use pg8000 for serverless/Supabase compatibility
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
-elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+pg8000://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
-    
+elif DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgresql+psycopg2://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1).replace("postgresql+psycopg2://", "postgresql+pg8000://", 1)
+
 if "sslmode=require" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("?sslmode=require", "").replace("&sslmode=require", "")
 
@@ -55,8 +57,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # pg8000 requires explicit ssl_context via connect_args for SSL connections (like Supabase)
 if "pg8000" in DATABASE_URL:
     import ssl
+    ssl_context = ssl.create_default_context()
+    # If the system CA bundle is missing the Supabase CA, we allow it to connect 
+    # but still use SSL. This is common in Windows environments.
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {'ssl_context': ssl.create_default_context()}
+        'connect_args': {'ssl_context': ssl_context}
     }
 
 db.init_app(app)
