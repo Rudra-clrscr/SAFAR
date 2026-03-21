@@ -47,7 +47,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     DATABASE_URL = (
         "postgresql+pg8000://postgres.cicxpxpssoqetgvheqcg:AI_Defenders_2026"
-        "@aws-0-ap-northeast-1-t4g.nano.pooler.supabase.com:6543/postgres"
+        "@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
     )
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used

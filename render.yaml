@@ -8,7 +8,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: DATABASE_URL
-        value: postgresql+pg8000://postgres.cicxpxpssoqetgvheqcg:AI_Defenders_2026@aws-0-ap-northeast-1-t4g.nano.pooler.supabase.com:6543/postgres
+        value: postgresql+pg8000://postgres.cicxpxpssoqetgvheqcg:AI_Defenders_2026@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres
       - key: SECRET_KEY
         value: change_me_in_production
       - key: SUPABASE_URL
