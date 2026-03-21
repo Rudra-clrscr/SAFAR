@@ -40,12 +40,12 @@ from database import (
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
-# Database Strategy: Always prefer Supabase via pg8000 for serverless compatibility
+# Database Strategy: Use Supabase pooler (port 6543) for Render/serverless compatibility
+# Port 5432 = direct connection (blocked by some hosts like Render)
+# Port 6543 = Supabase connection pooler (recommended for external deployments)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
-    # Build fallback URL from parts if DATABASE_URL is missing but fragments exist
-    # (Though we prefer a single DATABASE_URL in .env)
-    DATABASE_URL = 'postgresql+pg8000://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres'
+    DATABASE_URL = 'postgresql+pg8000://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:6543/postgres'
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
 if DATABASE_URL.startswith("postgres://"):
@@ -68,10 +68,12 @@ if "pg8000" in DATABASE_URL:
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Use NullPool when using Supabase connection pooler (Supavisor handles pooling)
+from sqlalchemy.pool import NullPool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': connect_args,
-    'pool_pre_ping': True,
-    'pool_recycle': 300,
+    'poolclass': NullPool,
 }
 
 db.init_app(app)
