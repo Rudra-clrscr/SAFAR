@@ -41,14 +41,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
 # Database Strategy:
-# - Prefer direct Supabase connection on 5432 with SSL.
-# - If env points to the Supabase pooler on 6543, automatically fall back to 5432
-#   when 6543 is unreachable (seen on Render free tier).
+# - Prefer the Supabase shared pooler on 6543 for Render compatibility.
+# - If the pooler host is provided, we can still try session mode on 5432 as a fallback.
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     DATABASE_URL = (
-        "postgresql+pg8000://postgres:AI_Defenders_2026"
-        "@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres?sslmode=require"
+        "postgresql+pg8000://postgres.cicxpxpssoqetgvheqcg:AI_Defenders_2026"
+        "@aws-0-ap-northeast-1-t4g.nano.pooler.supabase.com:6543/postgres"
     )
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
