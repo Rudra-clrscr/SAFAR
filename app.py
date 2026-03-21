@@ -40,12 +40,16 @@ from database import (
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
-# Database Strategy: Use Supabase pooler (port 6543) for Render/serverless compatibility
-# Port 5432 = direct connection (blocked by some hosts like Render)
-# Port 6543 = Supabase connection pooler (recommended for external deployments)
+# Database Strategy:
+# - Prefer direct Supabase connection on 5432 with SSL.
+# - If env points to the Supabase pooler on 6543, automatically fall back to 5432
+#   when 6543 is unreachable (seen on Render free tier).
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
-    DATABASE_URL = 'postgresql+pg8000://postgres:AI_Defenders_2026@db.cicxpxpssoqetgvheqcg.supabase.co:6543/postgres'
+    DATABASE_URL = (
+        "postgresql+pg8000://postgres:AI_Defenders_2026"
+        "@db.cicxpxpssoqetgvheqcg.supabase.co:5432/postgres?sslmode=require"
+    )
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
 if DATABASE_URL.startswith("postgres://"):
@@ -61,16 +65,49 @@ if "pg8000" in DATABASE_URL:
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
     connect_args['ssl_context'] = ssl_context
+    connect_args['timeout'] = float(os.environ.get("DB_CONNECT_TIMEOUT", "5"))  # seconds
     
     # Strip sslmode from URL if present (redundant with connect_args)
     if "sslmode=" in DATABASE_URL:
         DATABASE_URL = re.sub(r'[?&]sslmode=[^&]+', '', DATABASE_URL)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError, InterfaceError
+from sqlalchemy.pool import NullPool
+
+# Try primary URL, then auto-fallback 6543 -> 5432 if needed
+engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
+chosen_url = DATABASE_URL
+
+def _try_connect(url: str) -> bool:
+    """One-shot connection probe so we can gracefully fall back."""
+    engine = create_engine(url, **engine_opts)
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return True
+    except (OperationalError, InterfaceError) as e:
+        print(f"[DB] Connection failed for {url}: {e}")
+        return False
+    finally:
+        engine.dispose()
+
+# Only probe when explicitly allowed (skip during certain unit tests)
+if os.environ.get("DB_PROBE", "1") == "1":
+    if not _try_connect(chosen_url) and ":6543/" in chosen_url:
+        fallback_url = chosen_url.replace(":6543/", ":5432/")
+        # ensure sslmode when switching to direct port
+        if "?" in fallback_url:
+            fallback_url += "&sslmode=require"
+        else:
+            fallback_url += "?sslmode=require"
+        if _try_connect(fallback_url):
+            print("[DB] Falling back to Supabase direct port 5432 with SSL.")
+            chosen_url = fallback_url
+
+app.config['SQLALCHEMY_DATABASE_URI'] = chosen_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Use NullPool when using Supabase connection pooler (Supavisor handles pooling)
-from sqlalchemy.pool import NullPool
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': connect_args,
     'poolclass': NullPool,
