@@ -86,8 +86,11 @@ def _try_connect(url: str) -> bool:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
-    except (OperationalError, InterfaceError) as e:
+    except (OperationalError, InterfaceError, TypeError, ValueError) as e:
         print(f"[DB] Connection failed for {url}: {e}")
+        return False
+    except Exception as e:
+        print(f"[DB] Unexpected connection failure for {url}: {e}")
         return False
     finally:
         engine.dispose()
@@ -96,11 +99,6 @@ def _try_connect(url: str) -> bool:
 if os.environ.get("DB_PROBE", "1") == "1":
     if not _try_connect(chosen_url) and ":6543/" in chosen_url:
         fallback_url = chosen_url.replace(":6543/", ":5432/")
-        # ensure sslmode when switching to direct port
-        if "?" in fallback_url:
-            fallback_url += "&sslmode=require"
-        else:
-            fallback_url += "?sslmode=require"
         if _try_connect(fallback_url):
             print("[DB] Falling back to Supabase direct port 5432 with SSL.")
             chosen_url = fallback_url
