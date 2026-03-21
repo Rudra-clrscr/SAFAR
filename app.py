@@ -72,12 +72,13 @@ if "pg8000" in DATABASE_URL:
         DATABASE_URL = re.sub(r'[?&]sslmode=[^&]+', '', DATABASE_URL)
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError, InterfaceError
+from sqlalchemy.exc import DBAPIError, OperationalError, InterfaceError
 from sqlalchemy.pool import NullPool
 
 # Try primary URL, then auto-fallback 6543 -> 5432 if needed
 engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
 chosen_url = DATABASE_URL
+db_connection_ready = True
 
 def _try_connect(url: str) -> bool:
     """One-shot connection probe so we can gracefully fall back."""
@@ -97,14 +98,26 @@ def _try_connect(url: str) -> bool:
 
 # Only probe when explicitly allowed (skip during certain unit tests)
 if os.environ.get("DB_PROBE", "1") == "1":
-    if not _try_connect(chosen_url) and ":6543/" in chosen_url:
+    db_connection_ready = _try_connect(chosen_url)
+    if not db_connection_ready and ":6543/" in chosen_url:
         fallback_url = chosen_url.replace(":6543/", ":5432/")
         if _try_connect(fallback_url):
             print("[DB] Falling back to Supabase direct port 5432 with SSL.")
             chosen_url = fallback_url
+            db_connection_ready = True
+    if (
+        not db_connection_ready
+        and ".supabase.co" in chosen_url
+        and ".pooler.supabase.com" not in chosen_url
+    ):
+        print(
+            "[DB] Supabase on Render should usually use the shared pooler host "
+            "(*.pooler.supabase.com) instead of db.<project-ref>.supabase.co."
+        )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = chosen_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['DB_CONNECTION_READY'] = db_connection_ready
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'connect_args': connect_args,
@@ -122,6 +135,16 @@ twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) if TWILIO_EN
 
 # In-memory OTP store  {phone: {otp, timestamp}}
 otp_storage = {}
+
+
+def database_unavailable_response():
+    message = (
+        "Database is temporarily unavailable. Update Render's DATABASE_URL to the "
+        "Supabase shared pooler connection string from the Supabase dashboard."
+    )
+    if request.path.startswith('/api/'):
+        return jsonify({'error': message}), 503
+    return message, 503
 
 
 # ─────────────────────────────────────────────
@@ -183,6 +206,15 @@ def find_or_create_destination(name: str) -> str | None:
     db.session.add(dest)
     db.session.commit()
     return dest.id
+
+
+@app.errorhandler(OperationalError)
+@app.errorhandler(InterfaceError)
+@app.errorhandler(DBAPIError)
+def handle_database_error(error):
+    db.session.rollback()
+    print(f"[DB] Request failed: {error}")
+    return database_unavailable_response()
 
 
 # ─────────────────────────────────────────────
@@ -643,6 +675,9 @@ def api_register():
 
     try:
         db.session.flush()   # get user.id before commit
+    except (OperationalError, InterfaceError, DBAPIError):
+        db.session.rollback()
+        return database_unavailable_response()
     except Exception as e:
         db.session.rollback()
         import traceback
@@ -1369,6 +1404,8 @@ def anomaly_loop():
 @app.before_request
 def start_anomaly_thread():
     if not hasattr(app, 'anomaly_thread_started'):
+        if not app.config.get('DB_CONNECTION_READY', True):
+            return
         app.anomaly_thread_started = True
         threading.Thread(target=anomaly_loop, daemon=True).start()
 
