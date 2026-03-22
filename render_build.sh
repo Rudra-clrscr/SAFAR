@@ -6,4 +6,4 @@ set -o errexit
 pip install -r requirements.txt
 
 # Create tables and seed data
-python init_db.py
+python -c "from app import init_db; init_db()"

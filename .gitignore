@@ -27,6 +27,13 @@ shared_requirements.txt
 requirements_extra.txt
 project_template/
 diagnostic.py
+diagnostic_results.txt
+branch.txt
+git_log.txt
+log.txt
+show.txt
+show2.txt
+status.txt
 
 # IDE / Editor
 .vscode/
