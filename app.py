@@ -8,9 +8,14 @@ Run locally:
     python app.py
 """
 
-import os, re, uuid, hashlib, threading, time, random
+import os, re, sys, uuid, hashlib, threading, time, random
 from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
+
+# Ensure local modules (for example database.py) resolve even in restricted path mode.
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -26,12 +31,22 @@ try:
 except ImportError:
     TWILIO_ENABLED = False
 
-from database import (
-    db,
-    User, Destination, Group, GroupMember, GroupMessage,
-    Tourist, SafetyZone, Alert, Anomaly,
-    generate_id
-)
+try:
+    from database import (
+        db,
+        User, Destination, Group, GroupMember, GroupMessage,
+        Tourist, SafetyZone, Alert, Anomaly,
+        generate_id
+    )
+except ModuleNotFoundError as exc:
+    if exc.name in {"flask_sqlalchemy", "sqlalchemy"}:
+        print("\n[Startup Error] Missing database dependency:", exc.name)
+        print("Current Python executable:", sys.executable)
+        print("This usually happens when app is launched from a new USB environment.")
+        print("Prepare local dependencies and run from project directory:")
+        print(r"  1) .\fix_install.bat")
+        print(r"  2) .\run_usb.bat")
+    raise
 
 # ─────────────────────────────────────────────
 # APP SETUP
@@ -43,6 +58,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 # Database Strategy:
 # - Prefer the Supabase shared pooler on 6543 for Render compatibility.
 # - If the pooler host is provided, we can still try session mode on 5432 as a fallback.
+# - If ALL remote DBs fail, fall back to local SQLite so the app works offline.
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     DATABASE_URL = (
@@ -64,7 +80,7 @@ if "pg8000" in DATABASE_URL:
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
     connect_args['ssl_context'] = ssl_context
-    connect_args['timeout'] = float(os.environ.get("DB_CONNECT_TIMEOUT", "5"))  # seconds
+    connect_args['timeout'] = float(os.environ.get("DB_CONNECT_TIMEOUT", "3"))  # seconds
     
     # Strip sslmode from URL if present (redundant with connect_args)
     if "sslmode=" in DATABASE_URL:
@@ -78,10 +94,16 @@ from sqlalchemy.pool import NullPool
 engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
 chosen_url = DATABASE_URL
 db_connection_ready = True
+using_sqlite = False
+
+SQLITE_URL = 'sqlite:///' + os.path.join(
+    os.path.abspath(os.path.dirname(__file__)), 'instance', 'safar_local.db'
+)
 
 def _try_connect(url: str) -> bool:
     """One-shot connection probe so we can gracefully fall back."""
-    engine = create_engine(url, **engine_opts)
+    opts = {'connect_args': connect_args, 'poolclass': NullPool} if 'pg8000' in url else {}
+    engine = create_engine(url, **opts)
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
@@ -96,7 +118,11 @@ def _try_connect(url: str) -> bool:
         engine.dispose()
 
 # Only probe when explicitly allowed (skip during certain unit tests)
-if os.environ.get("DB_PROBE", "1") == "1":
+# USE_SQLITE=1 forces local mode immediately
+_user_provided_db = bool(os.environ.get('DATABASE_URL'))
+if os.environ.get("USE_SQLITE", "0") == "1":
+    db_connection_ready = False   # will trigger SQLite below
+elif os.environ.get("DB_PROBE", "1") == "1":
     db_connection_ready = _try_connect(chosen_url)
     if not db_connection_ready and ":6543/" in chosen_url:
         fallback_url = chosen_url.replace(":6543/", ":5432/")
@@ -113,15 +139,32 @@ if os.environ.get("DB_PROBE", "1") == "1":
             "[DB] Supabase on Render should usually use the shared pooler host "
             "(*.pooler.supabase.com) instead of db.<project-ref>.supabase.co."
         )
+else:
+    # DB_PROBE=0 and no user-provided DATABASE_URL → use SQLite
+    if not _user_provided_db:
+        db_connection_ready = False
+
+# ── SQLite fallback when all remote DBs fail ──
+if not db_connection_ready:
+    print("[DB] ⚡ Remote DB unreachable — falling back to local SQLite.")
+    chosen_url = SQLITE_URL
+    connect_args = {}
+    engine_opts = {}
+    using_sqlite = True
+    db_connection_ready = True
+    os.makedirs(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = chosen_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DB_CONNECTION_READY'] = db_connection_ready
 
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'connect_args': connect_args,
-    'poolclass': NullPool,
-}
+if using_sqlite:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
+else:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': connect_args,
+        'poolclass': NullPool,
+    }
 
 db.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins='*', async_mode='threading')
@@ -1054,11 +1097,16 @@ def tt_group_members(group_id):
 
 @app.route('/api/tt/groups/<group_id>/messages')
 def tt_group_messages(group_id):
+    limit = min(int(request.args.get('limit', 100)), 200)
+    before_id = request.args.get('before')
+
+    query = GroupMessage.query.filter_by(group_id=group_id)
+    if before_id:
+        query = query.filter(GroupMessage.id < int(before_id))
     msgs = (
-        GroupMessage.query
-        .filter_by(group_id=group_id)
+        query
         .order_by(GroupMessage.timestamp.asc())
-        .limit(100)
+        .limit(limit)
         .all()
     )
     return jsonify([{
@@ -1330,18 +1378,81 @@ def cron_anomaly_check(secret_key):
 # ════════════════════════════════════════════
 # ─────────────────────────────────────────────
 
+# Online tracking: { room_id: { sid: username } }
+online_users = {}
+
+def _broadcast_online(room):
+    """Push updated online list to everyone in the room."""
+    users = list(set(online_users.get(room, {}).values()))
+    socketio.emit('online_users', {'users': users}, room=room)
+
+
 @socketio.on('join')
 def on_join(data):
     room = data.get('group_id')
-    if room:
-        join_room(room)
-        emit('status', {'message': f"Joined room {room}"}, room=room)
+    username = data.get('username', '')
+    if not room:
+        return
+    join_room(room)
+
+    # Track online user
+    sid = request.sid
+    if room not in online_users:
+        online_users[room] = {}
+    online_users[room][sid] = username
+
+    # Broadcast join + online list
+    emit('user_joined', {'username': username}, room=room, include_self=False)
+    _broadcast_online(room)
+
 
 @socketio.on('leave')
 def on_leave(data):
     room = data.get('group_id')
+    username = data.get('username', '')
+    if not room:
+        return
+    leave_room(room)
+
+    # Remove from online tracking
+    sid = request.sid
+    if room in online_users:
+        online_users[room].pop(sid, None)
+        if not online_users[room]:
+            del online_users[room]
+
+    emit('user_left', {'username': username}, room=room)
+    _broadcast_online(room)
+
+
+@socketio.on('disconnect')
+def on_disconnect():
+    """Clean up all rooms when a user disconnects."""
+    sid = request.sid
+    for room in list(online_users.keys()):
+        if sid in online_users[room]:
+            username = online_users[room].pop(sid)
+            if not online_users[room]:
+                del online_users[room]
+            emit('user_left', {'username': username}, room=room)
+            _broadcast_online(room)
+
+
+@socketio.on('typing')
+def on_typing(data):
+    room = data.get('group_id')
+    username = data.get('username', '')
     if room:
-        leave_room(room)
+        emit('user_typing', {'username': username}, room=room, include_self=False)
+
+
+@socketio.on('stop_typing')
+def on_stop_typing(data):
+    room = data.get('group_id')
+    username = data.get('username', '')
+    if room:
+        emit('user_stop_typing', {'username': username}, room=room, include_self=False)
+
 
 @socketio.on('send_message')
 def on_send_message(data):
@@ -1386,10 +1497,57 @@ def init_db():
         print("Database ready.")
 
 
-def run_server(host='0.0.0.0', port=5000, debug=False):
+def _is_bind_error(error: OSError) -> bool:
+    """True when the socket bind was blocked or already in use."""
+    msg = str(error).lower()
+    return (
+        getattr(error, "winerror", None) in {10013, 10048}
+        or "forbidden by its access permissions" in msg
+        or "only one usage of each socket address" in msg
+    )
+
+
+def run_server(host=None, port=None, debug=False):
     """Entry point used by main.py / web.py launchers."""
     init_db()
-    socketio.run(app, host=host, port=port, debug=debug)
+
+    resolved_host = host or os.environ.get("HOST")
+    if not resolved_host:
+        resolved_host = "127.0.0.1" if debug else "0.0.0.0"
+
+    if port is None:
+        default_port = "5050" if debug else "5000"
+        port_text = os.environ.get("PORT", default_port)
+    else:
+        port_text = str(port)
+
+    try:
+        resolved_port = int(port_text)
+    except ValueError:
+        resolved_port = 5050 if debug else 5000
+
+    candidates = [(resolved_host, resolved_port)]
+    if resolved_host != "127.0.0.1":
+        candidates.append(("127.0.0.1", resolved_port))
+    for fallback_port in (5050, 8000, 8080, 5001):
+        for fallback_host in (resolved_host, "127.0.0.1"):
+            pair = (fallback_host, fallback_port)
+            if pair not in candidates:
+                candidates.append(pair)
+
+    last_error = None
+    for h, p in candidates:
+        try:
+            print(f"[Server] Trying http://{h}:{p}")
+            socketio.run(app, host=h, port=p, debug=debug)
+            return
+        except OSError as exc:
+            if not _is_bind_error(exc):
+                raise
+            last_error = exc
+            print(f"[Server] Bind failed on {h}:{p} ({exc}). Trying next option...")
+
+    raise RuntimeError(f"Could not bind any local server port. Last error: {last_error}")
 
 
 def anomaly_loop():

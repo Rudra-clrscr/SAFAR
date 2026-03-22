@@ -40,6 +40,20 @@ SAFAR/
 
 ## Quick Start
 
+### USB / Portable setup (recommended)
+If you run this project from a USB drive and want to keep your `C:` drive clean:
+
+```bat
+setup_usb_shared.bat   :: one-time per USB drive
+fix_install.bat
+run_usb.bat
+```
+
+This uses:
+- USB-wide shared packages in `X:\tools\py-shared` (one-time install)
+- project-local extras in `.\portable_packages`
+- direct run via `run_usb.bat`
+
 ### 1. Install dependencies
 ```bash
 pip install -r requirements.txt

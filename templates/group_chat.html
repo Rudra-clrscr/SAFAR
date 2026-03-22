@@ -2,72 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{group_name}} — Chat</title>
+  <title>{{group_name}} — Chat | SAFAR</title>
+  <meta name="description" content="Group chat for {{group_name}} on SAFAR — plan your tour together in real time.">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="chat-page" data-group-id="{{group_id}}" data-username="{{username}}">
 
 <nav class="navbar">
-  <a href="/groups" class="nav-logo" style="font-size:1.1rem">← Back to Groups</a>
+  <a href="/groups" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
   <div class="nav-links" id="nav-links">
+    <a href="/groups">Groups</a>
     <a href="/user" class="nav-badge">👤 {{username}}</a>
     <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
   </div>
   <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
 </nav>
 
-<div class="chat-layout">
-  <!-- Sidebar: members -->
-  <aside class="chat-sidebar">
+<div class="chat-container" id="chat-container">
+  <!-- Sidebar overlay (mobile) -->
+  <div class="chat-sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar: Group info + Members -->
+  <aside class="chat-sidebar" id="chat-sidebar">
     <div class="chat-sidebar-header">
-      <h3>Group Chat</h3>
-      <p>{{group_name}}</p>
+      <h3>{{group_name}}</h3>
+      <p>📍 {{destination_name or 'No destination set'}}</p>
+      <div class="group-meta">
+        <span>👥 {{member_count}} members</span>
+        <span id="online-status">●  <span id="online-count">0</span> online</span>
+      </div>
     </div>
+    <div class="chat-search-box">
+      <input type="search" id="msg-search" placeholder="🔍 Search messages..." autocomplete="off">
+    </div>
+    <div class="chat-members-title">Members</div>
     <div class="chat-members" id="chat-members">
       {% for m in members %}
-      <div class="member-chip">
-        <div class="member-avatar avatar-tt">{{m.username[0]|upper}}</div>
-        <div>
-          <div style="font-size:0.88rem;font-weight:600">{{m.username}}</div>
-          <div style="font-size:0.72rem;color:var(--text3)">{{m.role}}</div>
+      <div class="member-chip" data-username="{{m.username}}">
+        <div class="member-avatar avatar-tt">
+          {{m.username[0]|upper}}
+          <span class="offline-dot" id="dot-{{m.username}}"></span>
+        </div>
+        <div class="member-info">
+          <div class="member-name">{{m.username}}{% if m.username == username %} (You){% endif %}</div>
+          <div class="member-role {{'role-owner' if m.role == 'Owner' else ''}}">{{m.role}}</div>
         </div>
       </div>
       {% endfor %}
     </div>
   </aside>
 
-  <!-- Main chat -->
+  <!-- Main Chat -->
   <div class="chat-main">
-    <div class="chat-header">
-      <div>
+    <!-- Top Bar -->
+    <div class="chat-top-bar">
+      <button class="back-btn" id="back-btn" title="Back to groups" onclick="window.location='/groups'">←</button>
+      <div class="chat-group-avatar">{{group_name[0]|upper}}</div>
+      <div class="chat-top-info">
         <h2>{{group_name}}</h2>
-        <span style="font-size:0.8rem;color:var(--text2)">📍 {{destination_name or 'No destination'}}</span>
+        <div class="chat-top-sub">
+          <span>📍 {{destination_name or 'No destination'}}</span>
+          <span>•</span>
+          <span class="online-count" id="top-online-count">0 online</span>
+        </div>
       </div>
-      <span class="badge badge-tt">{{member_count}} members</span>
+      <div class="chat-top-actions">
+        <button id="search-toggle-btn" title="Search messages">🔍</button>
+        <button id="members-toggle-btn" title="Toggle members">👥</button>
+      </div>
     </div>
 
+    <!-- Messages -->
     <div class="chat-messages" id="messages">
+      <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+        <button class="load-more-btn" id="load-more-btn">↑ Load older messages</button>
+      </div>
+
+      {% if not messages %}
+      <div class="chat-empty" id="empty-state">
+        <div class="chat-empty-icon">💬</div>
+        <h3>Start the conversation!</h3>
+        <p>Send a message to begin planning your trip with the group.</p>
+      </div>
+      {% endif %}
+
+      <!-- Server-rendered messages -->
       {% for msg in messages %}
-      <div class="msg-row {{'sent' if msg.sender_name == username else 'received'}}">
+      <div class="msg-row {{'sent' if msg.sender_name == username else 'received'}}" data-sender="{{msg.sender_name}}" data-ts="{{msg.timestamp}}">
         <div class="msg-avatar">{{msg.sender_name[0]|upper}}</div>
-        <div>
+        <div class="msg-content">
           {% if msg.sender_name != username %}<div class="msg-name">{{msg.sender_name}}</div>{% endif %}
           <div class="msg-bubble">{{msg.message}}</div>
-          <div class="msg-time">{{msg.timestamp}}</div>
+          <div class="msg-footer">
+            <span class="msg-time">{{msg.timestamp}}</span>
+            {% if msg.sender_name == username %}<span class="msg-ticks">✓✓</span>{% endif %}
+          </div>
         </div>
       </div>
       {% endfor %}
+
+      <!-- Typing indicator -->
+      <div class="typing-indicator" id="typing-indicator">
+        <div class="typing-content">
+          <span class="typing-name" id="typing-name"></span>
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
     </div>
 
-    <div class="chat-input-bar">
-      <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
-      <button class="chat-send-btn" id="send-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
+    <!-- Scroll to bottom FAB -->
+    <button class="scroll-fab" id="scroll-fab">
+      ↓
+      <span class="unread-badge" id="unread-badge" style="display:none">0</span>
+    </button>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <div class="chat-input-bar" style="position:relative">
+        <button class="emoji-btn" id="emoji-btn" title="Emoji">😊</button>
+        <div class="chat-input-wrap">
+          <textarea id="msg-input" placeholder="Type a message..." rows="1" autocomplete="off"></textarea>
+        </div>
+        <button class="chat-send-btn" id="send-btn" title="Send">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+
+        <!-- Emoji Picker -->
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="emoji-tabs" id="emoji-tabs"></div>
+          <div class="emoji-grid" id="emoji-grid"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
 <script src="/static/group_chat.js"></script>
+<script src="/static/script.js"></script>
 </body></html>
