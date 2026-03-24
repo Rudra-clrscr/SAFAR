@@ -56,10 +56,26 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
 # Database Strategy:
-# - Prefer the Supabase shared pooler on 6543 for Render compatibility.
-# - If the pooler host is provided, we can still try session mode on 5432 as a fallback.
-# - If no remote DB is configured or ALL remote DBs fail, fall back to local SQLite.
+# - Prefer an explicit DATABASE_URL when provided.
+# - Otherwise, assemble a Supabase pooler URL from env parts when possible.
+# - SQLite fallback is optional and can be disabled for Supabase-only development.
 DATABASE_URL = (os.environ.get('DATABASE_URL') or '').strip()
+if not DATABASE_URL:
+    db_password = (os.environ.get('SUPABASE_DB_PASSWORD') or '').strip()
+    db_user = (os.environ.get('SUPABASE_DB_USER') or '').strip()
+    db_host = (os.environ.get('SUPABASE_DB_HOST') or '').strip()
+    db_name = (os.environ.get('SUPABASE_DB_NAME') or 'postgres').strip()
+    db_port = (os.environ.get('SUPABASE_DB_PORT') or '5432').strip()
+    if db_password and db_user and db_host:
+        from sqlalchemy.engine import URL
+        DATABASE_URL = URL.create(
+            "postgresql+pg8000",
+            username=db_user,
+            password=db_password,
+            host=db_host,
+            port=int(db_port),
+            database=db_name,
+        ).render_as_string(hide_password=False)
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
 if DATABASE_URL.startswith("postgres://"):
@@ -89,6 +105,8 @@ from sqlalchemy.pool import NullPool
 SQLITE_URL = 'sqlite:///' + os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'instance', 'safar_local.db'
 )
+require_remote_db = os.environ.get("REQUIRE_REMOTE_DB", "0") == "1"
+allow_sqlite_fallback = os.environ.get("ALLOW_SQLITE_FALLBACK", "1") == "1"
 
 engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
 chosen_url = DATABASE_URL
@@ -118,6 +136,12 @@ _user_provided_db = bool(DATABASE_URL)
 if os.environ.get("USE_SQLITE", "0") == "1":
     db_connection_ready = False   # will trigger SQLite below
 elif not _user_provided_db:
+    if require_remote_db:
+        raise RuntimeError(
+            "DATABASE_URL is missing. Set DATABASE_URL directly or provide "
+            "SUPABASE_DB_USER, SUPABASE_DB_PASSWORD, SUPABASE_DB_HOST, SUPABASE_DB_PORT, "
+            "and SUPABASE_DB_NAME in .env."
+        )
     db_connection_ready = False
 elif os.environ.get("DB_PROBE", "1") == "1":
     db_connection_ready = _try_connect(chosen_url)
@@ -142,6 +166,11 @@ else:
 
 # ── SQLite fallback when all remote DBs fail ──
 if not db_connection_ready:
+    if require_remote_db or not allow_sqlite_fallback:
+        raise RuntimeError(
+            "Supabase connection failed. Update DATABASE_URL with the current "
+            "Supabase pooler connection string and database password."
+        )
     print("[DB] Remote DB unavailable; falling back to local SQLite.")
     chosen_url = SQLITE_URL
     connect_args = {}
