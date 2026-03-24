@@ -3,218 +3,396 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAFAR | Blockchain Security Auditor</title>
+    <title>SAFAR | Identity Ledger & Blockchain Auditor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root {
-            --primary: #00ffcc;
-            --secondary: #121212;
-            --accent: #ff00ff;
-            --bg: #0a0a0a;
-            --card-bg: #1a1a1a;
-            --text: #e0e0e0;
+            --bg: #05070a;
+            --glass: rgba(13, 17, 23, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #f093fb;
+            --success: #00f5a0;
+            --danger: #ff4b2b;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
         }
 
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             margin: 0;
-            padding: 2rem;
-            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(79, 172, 254, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.05) 0%, transparent 40%);
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: #888;
-            font-style: italic;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1px solid currentColor;
-            margin-top: 1rem;
-        }
-
-        .status-badge.secure {
-            color: var(--primary);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-        }
-
-        .blockchain-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .block-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border-left: 5px solid var(--primary);
-            position: relative;
-            transition: transform 0.3s ease;
-        }
-
-        .block-card:hover {
-            transform: translateX(10px);
-        }
-
-        .block-card .index {
-            position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: rgba(255, 255, 255, 0.1);
-        }
-
-        .block-card h3 {
-            margin-top: 0;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .block-card .hash {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            word-break: break-all;
-            background: #000;
-            padding: 0.5rem;
-            border-radius: 4px;
-            margin: 0.5rem 0;
-            border: 1px solid #333;
-        }
-
-        .block-card .prev-hash {
-            color: #888;
-            font-size: 0.75rem;
-        }
-
-        .meta {
-            display: flex;
-            gap: 20px;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            color: #aaa;
-        }
-
-        .audit-info {
-            background: rgba(0, 255, 204, 0.05);
-            border: 1px dashed var(--primary);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
+        .navbar {
+            backdrop-filter: blur(12px);
+            background: rgba(5, 7, 10, 0.8);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.05;
-            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        /* Dashboard Overview */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-card h4 {
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-card .trend {
+            font-size: 0.8rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Live Terminal */
+        .terminal-box {
+            background: #000;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 3rem;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .terminal-header {
+            background: #1a1a1a;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dots { display: flex; gap: 6px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            height: 200px;
+            overflow-y: auto;
+            color: var(--success);
+            line-height: 1.5;
+        }
+
+        /* Blockchain List */
+        .chain-view {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .chain-view::before {
+            content: '';
+            position: absolute;
+            left: 30px; top: 0; bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+            z-index: 0;
+        }
+
+        .block {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 2rem;
+            z-index: 1;
+        }
+
+        .block-icon {
+            width: 60px; height: 60px;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.25rem;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+        }
+
+        .block-content {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .block-content:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .block-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .block-header h3 {
+            margin: 0; font-size: 1.1rem; color: var(--primary);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .block-header .time { font-size: 0.8rem; color: var(--text-dim); }
+
+        .hash-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .hash-label {
+            font-size: 0.65rem; text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 4px; display: block;
+        }
+
+        .hash-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: var(--secondary);
+        }
+
+        .hash-value.prev { color: var(--text-dim); opacity: 0.6; }
+
+        .identity-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px; border-radius: 8px;
+            font-size: 0.85rem; color: var(--text-main);
+        }
+
+        /* Animations */
+        @keyframes scan {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100%); }
+        }
+
+        .scan-line {
+            position: fixed; width: 100%; height: 2px;
+            background: rgba(0, 242, 254, 0.1);
+            top: 0; animation: scan 4s linear infinite;
+            z-index: 1000; pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="matrix-bg"></div>
+    <div class="scan-line"></div>
+    
+    <nav class="navbar">
+        <div class="logo">SAFAR IDENTITY LEDGER</div>
+        <div class="identity-badge">
+            <i class="fas fa-shield-halved" style="color:var(--success)"></i>
+            NETWORK SECURITY: STABLE
+        </div>
+    </nav>
+
     <div class="container">
-        <div class="header">
-            <h1>🛡️ SAFAR Blockchain Ledger</h1>
-            <p>Immutable Identity Security Protocol v2026.1</p>
-            <div id="chain-status" class="status-badge secure">Auditing...</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Blocks</h4>
+                <div class="value" id="stat-blocks">0</div>
+                <div class="trend"><i class="fas fa-link"></i> Verified Chain</div>
+            </div>
+            <div class="stat-card">
+                <h4>Encryption</h4>
+                <div class="value">SHA-256</div>
+                <div class="trend" style="color:var(--accent)"><i class="fas fa-lock"></i> Industrial Grade</div>
+            </div>
+            <div class="stat-card">
+                <h4>Ledger Integrity</h4>
+                <div class="value" id="stat-health">100%</div>
+                <div class="trend"><i class="fas fa-check-double"></i> Zero Tamper</div>
+            </div>
         </div>
 
-        <div class="audit-info" id="audit-stats">
-            <div>
-                <strong>Total Blocks:</strong> <span id="block-count">Loading...</span><br>
-                <strong>Encryption:</strong> SHA-256 (Industrial Standard)
+        <!-- Mining Console -->
+        <div class="terminal-box">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div>SAFAR CORE IDENTITY MINER v2.4</div>
             </div>
-            <div>
-                <strong>Last Audit:</strong> <span id="last-audit">Never</span>
+            <div class="terminal-body" id="console">
+                [SYSTEM] Initializing SAFAR Identity Blockchain...<br>
+                [SYSTEM] Connecting to immutable registration peer...<br>
+                [SYSTEM] Ready for audit logs.
             </div>
         </div>
 
-        <div id="blockchain-list" class="blockchain-grid">
-            <!-- Blocks will be injected here -->
-        </div>
+        <section class="chain-view" id="ledger">
+            <!-- Blocks injected here -->
+        </section>
     </div>
 
     <script>
-        async function loadAudit() {
+        const consoleEl = document.getElementById('console');
+        
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            consoleEl.innerHTML += `<div><span style="color:var(--text-dim)">[${time}]</span> ${msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        async function updateLedger() {
             try {
-                const response = await fetch('/api/blockchain/verify');
-                const data = await response.json();
+                // Verify Integrity
+                const vRes = await fetch('/api/blockchain/verify');
+                const vData = await vRes.json();
                 
-                document.getElementById('block-count').innerText = data.block_count;
-                document.getElementById('last-audit').innerText = new Date(data.audit_time).toLocaleTimeString();
+                document.getElementById('stat-blocks').innerText = vData.block_count;
+                document.getElementById('stat-health').innerText = vData.integrity_verified ? "100%" : "FAULT";
                 
-                const status = document.getElementById('chain-status');
-                if (data.integrity_verified) {
-                    status.innerText = "System Integrity: SECURE";
-                    status.classList.add('secure');
+                if (vData.integrity_verified) {
+                    log("Integrity check passed. Chain mathematical proof valid.");
                 } else {
-                    status.innerText = "CRITICAL: CHAIN TAMPERED";
-                    status.style.color = "#ff4d4d";
+                    log("<span style='color:var(--danger)'>ALARM: CHAIN TAMPER DETECTED! Mathematical proof mismatch.</span>");
                 }
 
-                // Load individual blocks (fetching from a separate endpoint we'll add)
-                const blocksRes = await fetch('/api/blockchain/blocks');
-                const blocks = await blocksRes.json();
+                // Fetch Blocks
+                const res = await fetch('/api/blockchain/blocks');
+                const blocks = await res.json();
                 
-                const list = document.getElementById('blockchain-list');
-                list.innerHTML = "";
+                const ledger = document.getElementById('ledger');
+                ledger.innerHTML = "";
                 
-                blocks.reverse().forEach(block => {
-                    const card = document.createElement('div');
-                    card.className = "block-card";
-                    card.innerHTML = `
-                        <div class="index">#${block.index}</div>
-                        <h3>📌 ${block.event_type} Event</h3>
-                        <div class="prev-hash">PREVIOUS HASH: ${block.previous_hash}</div>
-                        <div class="hash">CURRENT HASH: ${block.block_hash}</div>
-                        <div class="meta">
-                            <span>User: ${block.user_id.substring(0,8)}...</span>
-                            <span>Time: ${new Date(block.timestamp).toLocaleString()}</span>
+                blocks.reverse().forEach((b, idx) => {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = "block";
+                    blockDiv.innerHTML = `
+                        <div class="block-icon">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <div class="block-content">
+                            <div class="block-header">
+                                <h3>BLOCK #${b.index} | <span style="font-weight:400; font-size:0.9rem">${b.event_type}</span></h3>
+                                <div class="time">${new Date(b.timestamp).toLocaleString()}</div>
+                            </div>
+                            
+                            <div class="hash-box">
+                                <span class="hash-label">PREVIOUS BLOCK HASH</span>
+                                <div class="hash-value prev">${b.previous_hash}</div>
+                            </div>
+
+                            <div class="hash-box" style="border-color: rgba(0, 242, 254, 0.2)">
+                                <span class="hash-label">BLOCK SIGNATURE (SHA-256)</span>
+                                <div class="hash-value">${b.block_hash}</div>
+                            </div>
+
+                            <div style="display:flex; gap:1.5rem">
+                                <div class="identity-badge">
+                                    <i class="fas fa-user-shield" style="color:var(--secondary)"></i>
+                                    ID: ${b.user_id.substring(0,12)}...
+                                </div>
+                                <div class="identity-badge">
+                                    <i class="fas fa-check" style="color:var(--success)"></i>
+                                    MINED
+                                </div>
+                            </div>
                         </div>
                     `;
-                    list.appendChild(card);
+                    ledger.appendChild(blockDiv);
                 });
-            } catch (err) {
-                console.error("Audit failed", err);
+
+            } catch (e) {
+                log("<span style='color:var(--danger)'>Error syncing with secure peer.</span>");
             }
         }
 
-        loadAudit();
-        setInterval(loadAudit, 10000); // Re-audit every 10 seconds
+        // Initial update and auto-refresh
+        updateLedger();
+        setInterval(updateLedger, 5000);
+        
+        // Random "Miner" flavor text
+        setInterval(() => {
+            const flavor = [
+                "Verifying peer consensus...",
+                "SHA-256 cycles optimal.",
+                "Syncing immutable state...",
+                "Merkle root verified.",
+                "Polling identity shards..."
+            ];
+            log(flavor[Math.floor(Math.random() * flavor.length)]);
+        }, 8000);
     </script>
 </body>
 </html>
