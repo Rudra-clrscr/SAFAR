@@ -58,13 +58,8 @@ app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 # Database Strategy:
 # - Prefer the Supabase shared pooler on 6543 for Render compatibility.
 # - If the pooler host is provided, we can still try session mode on 5432 as a fallback.
-# - If ALL remote DBs fail, fall back to local SQLite so the app works offline.
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if not DATABASE_URL:
-    DATABASE_URL = (
-        "postgresql+pg8000://postgres.cicxpxpssoqetgvheqcg:AI_Defenders_2026"
-        "@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres"
-    )
+# - If no remote DB is configured or ALL remote DBs fail, fall back to local SQLite.
+DATABASE_URL = (os.environ.get('DATABASE_URL') or '').strip()
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
 if DATABASE_URL.startswith("postgres://"):
@@ -91,14 +86,14 @@ from sqlalchemy.exc import DBAPIError, OperationalError, InterfaceError
 from sqlalchemy.pool import NullPool
 
 # Try primary URL, then auto-fallback 6543 -> 5432 if needed
+SQLITE_URL = 'sqlite:///' + os.path.join(
+    os.path.abspath(os.path.dirname(__file__)), 'instance', 'safar_local.db'
+)
+
 engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
 chosen_url = DATABASE_URL
 db_connection_ready = True
 using_sqlite = False
-
-SQLITE_URL = 'sqlite:///' + os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), 'instance', 'safar_local.db'
-)
 
 def _try_connect(url: str) -> bool:
     """One-shot connection probe so we can gracefully fall back."""
@@ -119,9 +114,11 @@ def _try_connect(url: str) -> bool:
 
 # Only probe when explicitly allowed (skip during certain unit tests)
 # USE_SQLITE=1 forces local mode immediately
-_user_provided_db = bool(os.environ.get('DATABASE_URL'))
+_user_provided_db = bool(DATABASE_URL)
 if os.environ.get("USE_SQLITE", "0") == "1":
     db_connection_ready = False   # will trigger SQLite below
+elif not _user_provided_db:
+    db_connection_ready = False
 elif os.environ.get("DB_PROBE", "1") == "1":
     db_connection_ready = _try_connect(chosen_url)
     if not db_connection_ready and ":6543/" in chosen_url:
@@ -140,13 +137,12 @@ elif os.environ.get("DB_PROBE", "1") == "1":
             "(*.pooler.supabase.com) instead of db.<project-ref>.supabase.co."
         )
 else:
-    # DB_PROBE=0 and no user-provided DATABASE_URL → use SQLite
-    if not _user_provided_db:
-        db_connection_ready = False
+    # DB_PROBE=0 with a user-provided DATABASE_URL -> trust the configured DB.
+    db_connection_ready = True
 
 # ── SQLite fallback when all remote DBs fail ──
 if not db_connection_ready:
-    print("[DB] ⚡ Remote DB unreachable — falling back to local SQLite.")
+    print("[DB] Remote DB unavailable; falling back to local SQLite.")
     chosen_url = SQLITE_URL
     connect_args = {}
     engine_opts = {}
@@ -181,8 +177,9 @@ otp_storage = {}
 
 def database_unavailable_response():
     message = (
-        "Database is temporarily unavailable. Update Render's DATABASE_URL to the "
-        "Supabase shared pooler connection string from the Supabase dashboard."
+        "Database is temporarily unavailable. Check DATABASE_URL. "
+        "On Render, use the Supabase shared pooler connection string from the "
+        "Supabase dashboard."
     )
     if request.path.startswith('/api/'):
         return jsonify({'error': message}), 503
@@ -1643,7 +1640,10 @@ def run_server(host=None, port=None, debug=False):
     for h, p in candidates:
         try:
             print(f"[Server] Trying http://{h}:{p}")
-            socketio.run(app, host=h, port=p, debug=debug)
+            run_kwargs = {'host': h, 'port': p, 'debug': debug}
+            if debug or os.environ.get("ALLOW_UNSAFE_WERKZEUG", "0") == "1":
+                run_kwargs['allow_unsafe_werkzeug'] = True
+            socketio.run(app, **run_kwargs)
             return
         except OSError as exc:
             if not _is_bind_error(exc):
