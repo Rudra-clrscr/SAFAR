@@ -29,7 +29,7 @@ class BlockchainBlock(db.Model):
     
     id              = db.Column(db.Integer, primary_key=True, autoincrement=True)
     index           = db.Column(db.Integer, nullable=False)
-    timestamp       = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp       = db.Column(db.DateTime, default=datetime.now)
     event_type      = db.Column(db.String(50), nullable=False) # 'REGISTER' or 'LOGIN'
     user_id         = db.Column(db.String(32), nullable=False)
     data_hash       = db.Column(db.String(64), nullable=False) # SHA-256 of the event
@@ -55,7 +55,7 @@ class BlockchainBlock(db.Model):
         # Hash the specific event data (e.g. username+ip)
         d_hash = hashlib.sha256(str(event_data).encode()).hexdigest()
         
-        ts = datetime.utcnow()
+        ts = datetime.now()
         b_hash = BlockchainBlock.calculate_hash(idx, ts, event_type, user_id, d_hash, prev_h)
         
         new_block = BlockchainBlock(
@@ -84,7 +84,7 @@ class User(db.Model):
     phone       = db.Column(db.String(20))       # shared with Tourist
     gender      = db.Column(db.String(10))
     bio         = db.Column(db.Text)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime, default=datetime.now)
 
     # Relationships
     owned_groups   = relationship('Group', back_populates='owner', cascade='all, delete-orphan')
@@ -121,7 +121,7 @@ class Group(db.Model):
     destination_id = db.Column(db.String(32), ForeignKey('destinations.id', ondelete='SET NULL'))
     member_count = db.Column(db.Integer, default=1)
     max_members  = db.Column(db.Integer, default=50)
-    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at   = db.Column(db.DateTime, default=datetime.now)
 
     owner       = relationship('User', back_populates='owned_groups')
     destination = relationship('Destination', back_populates='groups')
@@ -141,7 +141,7 @@ class GroupMember(db.Model):
     user_id     = db.Column(db.String(32), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     role        = db.Column(db.String(10), default='Member')    # 'Owner' | 'Admin' | 'Member'
     join_status = db.Column(db.String(10), default='Approved')  # 'Pending' | 'Approved' | 'Rejected' | 'Blocked'
-    joined_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    joined_at   = db.Column(db.DateTime, default=datetime.now)
 
     group = relationship('Group', back_populates='members')
     user  = relationship('User', back_populates='memberships')
@@ -157,7 +157,7 @@ class GroupMessage(db.Model):
     group_id  = db.Column(db.String(32), ForeignKey('groups.id', ondelete='CASCADE'), nullable=False)
     sender_id = db.Column(db.String(32), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     message   = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
 
     group  = relationship('Group', back_populates='messages')
     sender = relationship('User', back_populates='sent_messages')
@@ -183,8 +183,8 @@ class Tourist(db.Model):
     visit_end_date      = db.Column(db.DateTime, nullable=False)
     safety_score        = db.Column(db.Integer, default=100)
     last_known_location = db.Column(db.String(100), default='Not Available')
-    registration_date   = db.Column(db.DateTime, default=datetime.utcnow)
-    last_updated_at     = db.Column(db.DateTime, default=datetime.utcnow)
+    registration_date   = db.Column(db.DateTime, default=datetime.now)
+    last_updated_at     = db.Column(db.DateTime, default=datetime.now)
 
     user     = relationship('User', back_populates='tourist_profile')
     alerts   = relationship('Alert', back_populates='tourist', cascade='all, delete-orphan')
@@ -218,7 +218,7 @@ class Alert(db.Model):
     tourist_id = db.Column(db.Integer, ForeignKey('tourists.id', ondelete='CASCADE'), nullable=False)
     location   = db.Column(db.String(100))
     alert_type = db.Column(db.String(100))
-    timestamp  = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp  = db.Column(db.DateTime, default=datetime.now)
 
     tourist = relationship('Tourist', back_populates='alerts')
 
@@ -233,7 +233,7 @@ class Anomaly(db.Model):
     tourist_id  = db.Column(db.Integer, ForeignKey('tourists.id', ondelete='CASCADE'), nullable=False)
     anomaly_type = db.Column(db.String(100))
     description  = db.Column(db.String(255))
-    timestamp    = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp    = db.Column(db.DateTime, default=datetime.now)
     status       = db.Column(db.String(20), default='active')   # 'active' | 'resolved'
 
     tourist = relationship('Tourist', back_populates='anomalies')

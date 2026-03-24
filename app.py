@@ -266,7 +266,7 @@ def handle_database_error(error):
 def check_for_anomalies():
     """Flags tourists inactive or exhibiting abnormal patterns using Isolation Forest."""
     with app.app_context():
-        now = datetime.utcnow()
+        now = datetime.now()
         active = Tourist.query.filter(Tourist.visit_end_date > now).all()
         if not active:
             return
@@ -876,7 +876,7 @@ def api_blockchain_verify():
         "block_count": len(blocks),
         "integrity_verified": chain_valid,
         "anomalies": errors,
-        "audit_time": datetime.utcnow().isoformat()
+        "audit_time": datetime.now().isoformat()
     })
 
 
@@ -1324,7 +1324,7 @@ def safety_update_location():
     Anomaly.query.filter_by(tourist_id=tourist.id, status='active').update({'status': 'resolved'})
 
     tourist.last_known_location = f"Lat: {lat}, Lon: {lon}"
-    tourist.last_updated_at     = datetime.utcnow()
+    tourist.last_updated_at     = datetime.now()
 
     # Geo-fence scoring
     current_zone_score = None
