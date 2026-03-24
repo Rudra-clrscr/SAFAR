@@ -1717,4 +1717,4 @@ def start_background_threads():
 
 
 if __name__ == '__main__':
-    run_server(debug=True)
+    run_server(debug=os.environ.get("APP_DEBUG", "0") == "1")

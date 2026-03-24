@@ -1,0 +1,5 @@
+[DB] Remote DB unavailable; falling back to local SQLite.
+Database ready.
+[Server] Trying http://127.0.0.1:5050
+ * Serving Flask app 'app'
+ * Debug mode: off
