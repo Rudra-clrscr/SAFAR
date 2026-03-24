@@ -186,6 +186,10 @@ class Tourist(db.Model):
     registration_date   = db.Column(db.DateTime, default=datetime.now)
     last_updated_at     = db.Column(db.DateTime, default=datetime.now)
 
+    # Blynk IoT Integration
+    blynk_token         = db.Column(db.String(64), nullable=True) # Blynk Auth Token
+    iot_mode_enabled    = db.Column(db.Boolean, default=False)    # Is it using IoT device GPS/SOS?
+
     user     = relationship('User', back_populates='tourist_profile')
     alerts   = relationship('Alert', back_populates='tourist', cascade='all, delete-orphan')
     anomalies = relationship('Anomaly', back_populates='tourist', cascade='all, delete-orphan')

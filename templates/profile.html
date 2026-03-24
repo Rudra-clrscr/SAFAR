@@ -64,6 +64,34 @@
       </button>
       <p style="font-size:0.78rem;color:var(--text3);max-width:200px;line-height:1.5">Tap to instantly alert authorities with your location</p>
     </div>
+
+    <!-- IoT Device Section -->
+    <div class="card" style="display:flex;flex-direction:column;gap:16px;">
+        <h3 style="font-size:1rem;color:var(--text2);text-transform:uppercase;letter-spacing:1px">🚀 IoT Hardware</h3>
+        <p style="font-size:0.75rem; color:var(--text3); text-align:left; margin-top:-10px;">Link external GPS/SOS hardware via Blynk Cloud.</p>
+        
+        <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+            <label style="font-size:0.75rem; color:var(--text2);">Sync Mode</label>
+            <select id="iot-mode" style="width:100%; background:rgba(255,255,10,0.05); color:#fff; border:1px solid var(--border); padding:8px; border-radius:6px;">
+                <option value="false" {% if not tourist.iot_mode_enabled %}selected{% endif %}>📱 Mobile Only</option>
+                <option value="true" {% if tourist.iot_mode_enabled %}selected{% endif %}>📡 IoT Hardware Mode</option>
+            </select>
+        </div>
+
+        <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+            <label style="font-size:0.75rem; color:var(--text2);">Blynk Auth Token</label>
+            <input type="text" id="blynk-token" value="{{ tourist.blynk_token or '' }}" placeholder="Paste Token Here..." 
+                   style="width:100%; background:rgba(0,0,0,0.2); color:var(--primary); border:1px solid var(--border); padding:8px; border-radius:6px; font-family:monospace; font-size:0.8rem;">
+        </div>
+
+        <button onclick="saveIoTConfig()" class="btn-nav btn-nav-fill" style="padding:10px; font-size:0.85rem;">
+            Update IoT Sync
+        </button>
+
+        <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.2); border-radius:10px; text-align:left; border-left:4px solid var(--primary);">
+            <p style="font-size:0.65rem; color:var(--text3); margin:0;"><strong>Pins Required:</strong><br>V1: Latitude | V2: Longitude | V3: SOS</p>
+        </div>
+    </div>
   </div>
 </div>
 
@@ -143,6 +171,22 @@ document.getElementById('panic-btn').addEventListener('click', async () => {
   } catch(e) { alert('Network error'); }
 });
 
-window.onload = () => { initMap(); sendLocation(); setInterval(sendLocation, 15000); };
+
+  async function saveIoTConfig() {
+    const token = document.getElementById('blynk-token').value.trim();
+    const enabled = document.getElementById('iot-mode').value === 'true';
+    if (!token && enabled) { alert('Please enter a Blynk Token to enable IoT mode.'); return; }
+    try {
+      const res = await fetch('/api/iot/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, enabled })
+      });
+      if (res.ok) { alert('IoT Configuration updated! Cloud sync active.'); location.reload(); }
+      else { const d = await res.json(); alert('Error: ' + d.error); }
+    } catch (e) { alert('Connection error.'); }
+  }
+
+  window.onload = () => { initMap(); sendLocation(); setInterval(sendLocation, 15000); };
 </script>
 </body></html>

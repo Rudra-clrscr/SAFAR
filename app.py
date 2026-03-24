@@ -8,7 +8,7 @@ Run locally:
     python app.py
 """
 
-import os, re, sys, uuid, hashlib, threading, time, random
+import os, re, sys, uuid, hashlib, threading, time, random, requests
 from datetime import datetime, timedelta
 from math import radians, sin, cos, sqrt, atan2
 
@@ -942,6 +942,26 @@ def api_verify_otp():
     return jsonify({'message': 'OTP verified.', 'verified': True}), 200
 
 
+@app.route('/api/iot/config', methods=['POST'])
+def api_iot_config():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json(force=True)
+    token = data.get('token', '').strip()
+    enabled = data.get('enabled', False)
+
+    tourist = Tourist.query.filter_by(user_id=session['user_id']).first()
+    if not tourist:
+        return jsonify({'error': 'Tourist profile not found. Please complete KYC first.'}), 404
+        
+    tourist.blynk_token = token
+    tourist.iot_mode_enabled = enabled
+    db.session.commit()
+    
+    return jsonify({'message': 'IoT Device configuration updated.'}), 200
+
+
 # ─────────────────────────────────────────────
 # ════════════════════════════════════════════
 #  TRAVEL TOGETHER API  (/api/tt/...)
@@ -1642,13 +1662,58 @@ def anomaly_loop():
             print(f"Anomaly loop error: {e}")
         time.sleep(300)
 
+def blynk_loop():
+    """Polls Blynk Cloud for hardware SOS and GPS data every 30s."""
+    with app.app_context():
+        while True:
+            try:
+                iot_users = Tourist.query.filter_by(iot_mode_enabled=True).all()
+                for user in iot_users:
+                    # Provide default master token if user profile doesn't have one set
+                    active_token = user.blynk_token or os.environ.get('BLYNK_AUTH_TOKEN', '2jkZ6xI1TFwbKW0q6BZsxBLe9PHz3kmV')
+                    if not active_token: continue
+                    
+                    # Fetch Virtual Pins individually to ensure cloud compatibility
+                    base_url = f"https://blynk.cloud/external/api/get?token={active_token}"
+                    
+                    try:
+                        res_v1 = requests.get(f"{base_url}&V1", timeout=5)
+                        res_v2 = requests.get(f"{base_url}&V2", timeout=5)
+                        res_v3 = requests.get(f"{base_url}&V3", timeout=5)
+                        
+                        lat = res_v1.text.strip('[]"') if res_v1.status_code == 200 else None
+                        lon = res_v2.text.strip('[]"') if res_v2.status_code == 200 else None
+                        sos_val = res_v3.text.strip('[]"') if res_v3.status_code == 200 else "0"
+
+                        # Update Location if hardware GPS is active and valid (not 0.0)
+                        if lat and lon and lat != "Invalid" and lon != "Invalid" and float(lat) != 0.0 and float(lon) != 0.0:
+                            user.last_known_location = f"Lat: {lat}, Lon: {lon}"
+                            user.last_updated_at = datetime.now()
+                        
+                        # Trigger SOS Alert on physical button press (V3 == 1)
+                        if str(sos_val) == "1":
+                            # Check if already alerted in the last 10 mins
+                            existing = Alert.query.filter_by(tourist_id=user.id, alert_type='HARDWARE SOS').order_by(Alert.timestamp.desc()).first()
+                            if not existing or (datetime.now() - existing.timestamp).seconds > 600:
+                                db.session.add(Alert(tourist_id=user.id, location=user.last_known_location, alert_type='HARDWARE SOS'))
+                                db.session.add(Anomaly(tourist_id=user.id, anomaly_type='Blynk Hardware SOS', description='Physical SOS button press detected via Blynk IoT Cloud.', status='active'))
+                        
+                        db.session.commit()
+                    except Exception as req_err:
+                        print(f"Blynk request error for {user.name}: {req_err}")
+                        
+            except Exception as e:
+                print(f"Blynk loop error: {e}")
+            time.sleep(15) # Poll every 15 seconds for faster hardware reflex
+
 @app.before_request
-def start_anomaly_thread():
-    if not hasattr(app, 'anomaly_thread_started'):
+def start_background_threads():
+    if not hasattr(app, 'threads_started'):
         if not app.config.get('DB_CONNECTION_READY', True):
             return
-        app.anomaly_thread_started = True
+        app.threads_started = True
         threading.Thread(target=anomaly_loop, daemon=True).start()
+        threading.Thread(target=blynk_loop, daemon=True).start()
 
 
 if __name__ == '__main__':
