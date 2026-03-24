@@ -1,0 +1,16 @@
+# ☁️ Cloudflare Tunnel Configuration for SAFAR
+# ─────────────────────────────────────────────
+# Path: ./cloudflared_config.yml
+
+# Replace this with your Actual Tunnel ID after running 'cloudflared tunnel create'
+# tunnel: <YOUR_TUNNEL_ID_HERE>
+# credentials-file: <PATH_TO_YOUR_JSON_FILE>
+
+ingress:
+  # 1. Route the main SAFAR app
+  # Change the port below if you run your app on a different port (e.g., 8000)
+  - hostname: safar.yourdomain.com
+    service: http://localhost:5000
+
+  # 2. Add subdomains (optional) or leave this as a catch-all
+  - service: http_status:404
