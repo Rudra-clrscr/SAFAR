@@ -1664,8 +1664,8 @@ def anomaly_loop():
 
 def blynk_loop():
     """Polls Blynk Cloud for hardware SOS and GPS data every 30s."""
-    with app.app_context():
-        while True:
+    while True:
+        with app.app_context():
             try:
                 iot_users = Tourist.query.filter_by(iot_mode_enabled=True).all()
                 for user in iot_users:
@@ -1704,7 +1704,7 @@ def blynk_loop():
                         
             except Exception as e:
                 print(f"Blynk loop error: {e}")
-            time.sleep(15) # Poll every 15 seconds for faster hardware reflex
+        time.sleep(15) # Poll every 15 seconds for faster hardware reflex
 
 @app.before_request
 def start_background_threads():
