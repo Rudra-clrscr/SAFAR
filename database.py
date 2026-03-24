@@ -7,6 +7,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
+import hashlib
 
 db = SQLAlchemy()
 
@@ -16,6 +17,57 @@ db = SQLAlchemy()
 
 def generate_id():
     return uuid.uuid4().hex
+
+
+# ─────────────────────────────────────────────
+# BLOCKCHAIN SECURITY LAYER
+# ─────────────────────────────────────────────
+
+class BlockchainBlock(db.Model):
+    """Immutable Ledger for Login/Registration Security (Industry Standard)."""
+    __tablename__ = 'blockchain_ledger'
+    
+    id              = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    index           = db.Column(db.Integer, nullable=False)
+    timestamp       = db.Column(db.DateTime, default=datetime.utcnow)
+    event_type      = db.Column(db.String(50), nullable=False) # 'REGISTER' or 'LOGIN'
+    user_id         = db.Column(db.String(32), nullable=False)
+    data_hash       = db.Column(db.String(64), nullable=False) # SHA-256 of the event
+    previous_hash   = db.Column(db.String(64), nullable=False)
+    block_hash      = db.Column(db.String(64), nullable=False, unique=True)
+
+    @staticmethod
+    def calculate_hash(index, timestamp, event_type, user_id, data_hash, previous_hash):
+        value = f"{index}{timestamp}{event_type}{user_id}{data_hash}{previous_hash}"
+        return hashlib.sha256(value.encode()).hexdigest()
+
+    @staticmethod
+    def get_latest_block():
+        return BlockchainBlock.query.order_by(BlockchainBlock.index.desc()).first()
+
+    @staticmethod
+    def mine_block(event_type, user_id, event_data):
+        """Creates a new block in the chain."""
+        last_block = BlockchainBlock.get_latest_block()
+        idx = (last_block.index + 1) if last_block else 0
+        prev_h = last_block.block_hash if last_block else "0" * 64
+        
+        # Hash the specific event data (e.g. username+ip)
+        d_hash = hashlib.sha256(str(event_data).encode()).hexdigest()
+        
+        ts = datetime.utcnow()
+        b_hash = BlockchainBlock.calculate_hash(idx, ts, event_type, user_id, d_hash, prev_h)
+        
+        new_block = BlockchainBlock(
+            index=idx,
+            timestamp=ts,
+            event_type=event_type,
+            user_id=user_id,
+            data_hash=d_hash,
+            previous_hash=prev_h,
+            block_hash=b_hash
+        )
+        return new_block
 
 
 # ─────────────────────────────────────────────

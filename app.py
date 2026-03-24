@@ -35,7 +35,7 @@ try:
     from database import (
         db,
         User, Destination, Group, GroupMember, GroupMessage,
-        Tourist, SafetyZone, Alert, Anomaly,
+        Tourist, SafetyZone, Alert, Anomaly, BlockchainBlock,
         generate_id
     )
 except ModuleNotFoundError as exc:
@@ -747,6 +747,20 @@ def api_register():
         )
         db.session.add(tourist)
 
+    # --- Blockchain Security (Industrial Grade) ---
+    # Mine a new block to permanently record this registration event
+    try:
+        register_event = {
+            "username": user.username,
+            "email": user.email,
+            "ip": request.remote_addr,
+            "action": "ACCOUNT_CREATED"
+        }
+        block = BlockchainBlock.mine_block("REGISTER", user.id, register_event)
+        db.session.add(block)
+    except Exception as eb:
+        print(f"[Blockchain Error] Failed to log registration: {eb}")
+
     db.session.commit()
     session['user_id'] = user.id
 
@@ -773,6 +787,17 @@ def api_login():
         if not user or user.password != hash_password(data['password']):
             return jsonify({'error': 'Invalid credentials.'}), 401
         session['user_id'] = user.id
+        
+        # --- Blockchain Security ---
+        # Mine a block for successful login
+        try:
+            login_event = {"username": user.username, "ip": request.remote_addr, "status": "SUCCESS"}
+            block = BlockchainBlock.mine_block("LOGIN", user.id, login_event)
+            db.session.add(block)
+            db.session.commit()
+        except Exception as eb:
+            print(f"[Blockchain Error] Failed to log login: {eb}")
+
         return jsonify({'message': 'Login successful.', 'user_id': user.id}), 200
 
     if data.get('phone'):
@@ -794,6 +819,65 @@ def api_login():
 def api_logout():
     session.clear()
     return redirect(url_for('index'))
+
+
+# ─────────────────────────────────────────────
+# BLOCKCHAIN INTEGRITY API
+# ─────────────────────────────────────────────
+
+@app.route('/blockchain')
+def blockchain_audit_page():
+    return render_template('blockchain.html')
+
+@app.route('/api/blockchain/blocks', methods=['GET'])
+def api_blockchain_blocks():
+    """Returns the full chain for visual auditing."""
+    blocks = BlockchainBlock.query.order_by(BlockchainBlock.index.asc()).all()
+    return jsonify([{
+        "index": b.index,
+        "timestamp": b.timestamp.isoformat(),
+        "event_type": b.event_type,
+        "user_id": b.user_id,
+        "previous_hash": b.previous_hash[:16] + "...",
+        "block_hash": b.block_hash
+    } for b in blocks])
+
+@app.route('/api/blockchain/verify', methods=['GET'])
+def api_blockchain_verify():
+    """
+    Audits the entire identity ledger to ensure no administrative tampering
+    has occurred. This is the core of SAFAR's blockchain security.
+    """
+    blocks = BlockchainBlock.query.order_by(BlockchainBlock.index.asc()).all()
+    chain_valid = True
+    errors = []
+
+    for i in range(len(blocks)):
+        block = blocks[i]
+        
+        # 1. Verify internal hash
+        recalculated = BlockchainBlock.calculate_hash(
+            block.index, block.timestamp, block.event_type, 
+            block.user_id, block.data_hash, block.previous_hash
+        )
+        if recalculated != block.block_hash:
+            chain_valid = False
+            errors.append(f"Block #{block.index} hash mismatch (Internal Tampering detected)")
+
+        # 2. Verify link to previous block
+        if i > 0:
+            prev_block = blocks[i-1]
+            if block.previous_hash != prev_block.block_hash:
+                chain_valid = False
+                errors.append(f"Block #{block.index} previous_hash mismatch (Chain broken at #{i})")
+
+    return jsonify({
+        "status": "SECURE" if chain_valid else "TAMPERED",
+        "block_count": len(blocks),
+        "integrity_verified": chain_valid,
+        "anomalies": errors,
+        "audit_time": datetime.utcnow().isoformat()
+    })
 
 
 # ─────────────────────────────────────────────
