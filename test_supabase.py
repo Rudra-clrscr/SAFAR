@@ -1,30 +1,34 @@
-# Supabase Connection Tester for SAFAR
 import os
 import ssl
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError, InterfaceError
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 
-# 1. Load your credentials
 load_dotenv()
-DATABASE_URL = os.environ.get('DATABASE_URL')
 
-print(f"[Supabase Test] Connecting to: {DATABASE_URL[:30]}...")
+database_url = (os.environ.get("DATABASE_URL") or "").strip()
+if not database_url:
+    raise SystemExit("Missing DATABASE_URL in .env.")
 
-# 2. Setup SSL (Required for Supabase)
+engine_url = make_url(database_url)
+print(
+    f"[Supabase Test] Host={engine_url.host} Port={engine_url.port} Database={engine_url.database}"
+)
+
 ssl_context = ssl.create_default_context()
 ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
 
-connect_args = {'ssl_context': ssl_context, 'timeout': 5}
+connect_args = {"timeout": float(os.environ.get("DB_CONNECT_TIMEOUT", "20"))}
+if "pg8000" in database_url:
+    connect_args["ssl_context"] = ssl_context
 
-# 3. Test Connection
 try:
-    engine = create_engine(DATABASE_URL, connect_args=connect_args)
+    engine = create_engine(database_url, connect_args=connect_args)
     with engine.connect() as conn:
         conn.execute(text("SELECT 1"))
-    print("\n✅ SUCCESS! Your laptop is connected to Supabase.")
-    print("Your 'Astra' Safety system is now syncing to the cloud. 🌍📈")
-except Exception as e:
-    print(f"\n❌ FAILED: {e}")
-    print("\n[Tip] Make sure your internet is on and your Supabase IP allows this connection!")
+    print("SUCCESS: Supabase connection is working.")
+except Exception as exc:
+    print(f"FAILED: {exc}")
+    print("Tip: verify the password, pooler host, and network access.")

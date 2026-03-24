@@ -9,7 +9,3 @@ services:
         value: 3.11.0
       - key: SECRET_KEY
         value: change_me_in_production
-      - key: SUPABASE_URL
-        value: https://cicxpxpssoqetgvheqcg.supabase.co
-      - key: SUPABASE_KEY
-        value: sb_publishable_nPdidfXwWche0uZhinIxNg_Ag2-mjok

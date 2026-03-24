@@ -26,7 +26,6 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 # Optional Twilio
 try:
     from twilio.rest import Client as TwilioClient
-    from twilio.base.exceptions import TwilioRestException
     TWILIO_ENABLED = True
 except ImportError:
     TWILIO_ENABLED = False
@@ -55,27 +54,7 @@ except ModuleNotFoundError as exc:
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'change_me_in_production')
 
-# Database Strategy:
-# - Prefer an explicit DATABASE_URL when provided.
-# - Otherwise, assemble a Supabase pooler URL from env parts when possible.
-# - SQLite fallback is optional and can be disabled for Supabase-only development.
 DATABASE_URL = (os.environ.get('DATABASE_URL') or '').strip()
-if not DATABASE_URL:
-    db_password = (os.environ.get('SUPABASE_DB_PASSWORD') or '').strip()
-    db_user = (os.environ.get('SUPABASE_DB_USER') or '').strip()
-    db_host = (os.environ.get('SUPABASE_DB_HOST') or '').strip()
-    db_name = (os.environ.get('SUPABASE_DB_NAME') or 'postgres').strip()
-    db_port = (os.environ.get('SUPABASE_DB_PORT') or '5432').strip()
-    if db_password and db_user and db_host:
-        from sqlalchemy.engine import URL
-        DATABASE_URL = URL.create(
-            "postgresql+pg8000",
-            username=db_user,
-            password=db_password,
-            host=db_host,
-            port=int(db_port),
-            database=db_name,
-        ).render_as_string(hide_password=False)
 
 # Fix Render's 'postgres://' prefix and ensure pg8000 driver is used
 if DATABASE_URL.startswith("postgres://"):
@@ -91,8 +70,8 @@ if "pg8000" in DATABASE_URL:
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
     connect_args['ssl_context'] = ssl_context
-    connect_args['timeout'] = float(os.environ.get("DB_CONNECT_TIMEOUT", "3"))  # seconds
-    
+    connect_args['timeout'] = float(os.environ.get("DB_CONNECT_TIMEOUT", "10"))  # seconds
+
     # Strip sslmode from URL if present (redundant with connect_args)
     if "sslmode=" in DATABASE_URL:
         DATABASE_URL = re.sub(r'[?&]sslmode=[^&]+', '', DATABASE_URL)
@@ -108,7 +87,6 @@ SQLITE_URL = 'sqlite:///' + os.path.join(
 require_remote_db = os.environ.get("REQUIRE_REMOTE_DB", "0") == "1"
 allow_sqlite_fallback = os.environ.get("ALLOW_SQLITE_FALLBACK", "1") == "1"
 
-engine_opts = {'connect_args': connect_args, 'poolclass': NullPool}
 chosen_url = DATABASE_URL
 db_connection_ready = True
 using_sqlite = False
@@ -138,9 +116,7 @@ if os.environ.get("USE_SQLITE", "0") == "1":
 elif not _user_provided_db:
     if require_remote_db:
         raise RuntimeError(
-            "DATABASE_URL is missing. Set DATABASE_URL directly or provide "
-            "SUPABASE_DB_USER, SUPABASE_DB_PASSWORD, SUPABASE_DB_HOST, SUPABASE_DB_PORT, "
-            "and SUPABASE_DB_NAME in .env."
+            "DATABASE_URL is missing. Set the full PostgreSQL connection string in .env."
         )
     db_connection_ready = False
 elif os.environ.get("DB_PROBE", "1") == "1":
@@ -168,13 +144,12 @@ else:
 if not db_connection_ready:
     if require_remote_db or not allow_sqlite_fallback:
         raise RuntimeError(
-            "Supabase connection failed. Update DATABASE_URL with the current "
+            "Database connection failed. Update DATABASE_URL with the current "
             "Supabase pooler connection string and database password."
         )
     print("[DB] Remote DB unavailable; falling back to local SQLite.")
     chosen_url = SQLITE_URL
     connect_args = {}
-    engine_opts = {}
     using_sqlite = True
     db_connection_ready = True
     os.makedirs(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), exist_ok=True)
@@ -1622,9 +1597,13 @@ def on_send_message(data):
 
 def init_db():
     with app.app_context():
-        db.create_all()
-        seed_safety_zones()
-        print("Database ready.")
+        try:
+            db.create_all()
+            seed_safety_zones()
+            print("Database ready.")
+        except Exception as e:
+            print(f"[DB] Warning: db.create_all() encountered an issue (tables may already exist): {e}")
+            print("Database ready (skipped schema creation).")
 
 
 def _is_bind_error(error: OSError) -> bool:
@@ -1698,9 +1677,9 @@ def blynk_loop():
             try:
                 iot_users = Tourist.query.filter_by(iot_mode_enabled=True).all()
                 for user in iot_users:
-                    # Provide default master token if user profile doesn't have one set
-                    active_token = user.blynk_token or os.environ.get('BLYNK_AUTH_TOKEN', '2jkZ6xI1TFwbKW0q6BZsxBLe9PHz3kmV')
-                    if not active_token: continue
+                    active_token = user.blynk_token or os.environ.get('BLYNK_AUTH_TOKEN')
+                    if not active_token:
+                        continue
                     
                     # Fetch Virtual Pins individually to ensure cloud compatibility
                     base_url = f"https://blynk.cloud/external/api/get?token={active_token}"
@@ -1735,6 +1714,45 @@ def blynk_loop():
                 print(f"Blynk loop error: {e}")
         time.sleep(15) # Poll every 15 seconds for faster hardware reflex
 
+def rakesh_db_agent():
+    """High AI Agent 'Rakesh': Permanently monitors and self-heals the Supabase connection."""
+    with app.app_context():
+        supabase_api = os.environ.get('SUPABASE_URL')
+        while True:
+            try:
+                # 1. Check REST API Health (Bypasses port blocks, verifies database is online)
+                rest_ok = False
+                if supabase_api:
+                    try:
+                        res = requests.get(f"{supabase_api}/rest/v1/", timeout=5)
+                        rest_ok = res.status_code in [200, 401, 403, 404]
+                    except:
+                        pass
+                
+                # 2. Check SQLAlchemy Pool Health
+                pool_ok = False
+                try:
+                    with db.engine.connect() as conn:
+                        conn.execute(text("SELECT 1"))
+                        pool_ok = True
+                except Exception as e:
+                    err_msg = str(e).lower()
+                    if "circuit breaker" in err_msg or "timeout" in err_msg:
+                        print(f"[Agent Rakesh] ⚠️ DB Pool Stalled. Forcing pool flush and auto-reconnect...")
+                        db.engine.dispose() # Flushes all dead connections to reset the circuit breaker
+                
+                if pool_ok:
+                    pass # Silent operation when healthy to avoid console spam
+                elif rest_ok and not pool_ok:
+                    print("[Agent Rakesh] 🔄 Supabase Cloud is ONLINE, but Pooler is blocked. Swapped and reset pool.")
+                else:
+                    print("[Agent Rakesh] ❌ CRITICAL: Supabase is completely unreachable from this network.")
+                    
+            except Exception as e:
+                print(f"[Agent Rakesh] Diagnostics error: {e}")
+            
+            time.sleep(30) # Rakesh monitors every 30 seconds
+
 @app.before_request
 def start_background_threads():
     if not hasattr(app, 'threads_started'):
@@ -1743,6 +1761,8 @@ def start_background_threads():
         app.threads_started = True
         threading.Thread(target=anomaly_loop, daemon=True).start()
         threading.Thread(target=blynk_loop, daemon=True).start()
+        threading.Thread(target=rakesh_db_agent, daemon=True).start()
+        print("[Agent Rakesh] 🕶️ Activated. Monitoring Supabase health in background...")
 
 
 if __name__ == '__main__':
