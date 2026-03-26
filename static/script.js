@@ -79,4 +79,94 @@ document.addEventListener('DOMContentLoaded', () => {
       else appendMsg("Sorry, couldn't process that. Try again! 😊", 'bot');
     } catch { hideTyping(); appendMsg("Trouble connecting — check your internet and retry! 🔌", 'bot'); }
   }
+
+  // --- UI ANIMATIONS OVERHAUL ---
+
+  // 0. Auto-inject Loader & Cursor HTML if missing
+  if (!document.getElementById('global-loader')) {
+    const l = document.createElement('div');
+    l.id = 'global-loader';
+    l.className = 'page-loader';
+    l.innerHTML = '<div class="loader-logo">SAFAR</div>';
+    document.body.prepend(l);
+  }
+  
+  if (!document.getElementById('custom-cursor')) {
+    const c = document.createElement('div');
+    c.id = 'custom-cursor';
+    c.className = 'custom-cursor';
+    document.body.appendChild(c);
+  }
+
+  // 1. Smooth Page Loader
+  const loader = document.getElementById('global-loader');
+  if (loader) {
+    // Force minimum 500ms display for smooth entrance, then fade out
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.style.display = 'none', 800);
+    }, 500);
+  }
+
+  // 2. Custom Cursor
+  const cursor = document.getElementById('custom-cursor');
+  if (cursor) {
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    
+    // Add hover effect for interactive elements
+    const interactives = document.querySelectorAll('a, button, .card, .card-3d, .dest-card, .feature-card, input, select');
+    interactives.forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+    });
+  }
+
+  // 3. Entrance Reveals (Intersection Observer)
+  const reveals = document.querySelectorAll('.reveal');
+  if (reveals.length > 0) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          // Optional: stop observing once revealed
+          // revealObserver.unobserve(entry.target); 
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    
+    reveals.forEach(r => revealObserver.observe(r));
+  }
+
+  // 4. 3D Tilt Motion for Hero Mascots & Cards
+  const tiltElements = document.querySelectorAll('[data-tilt]');
+  tiltElements.forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Calculate rotation (max 15 degrees)
+      const rotateX = ((y - centerY) / centerY) * -15; 
+      const rotateY = ((x - centerX) / centerX) * 15;
+      
+      // Select the inner 3D object (assuming it's the mascot image)
+      const target = el.querySelector('img') || el;
+      target.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05) translateZ(50px)`;
+      target.style.transition = 'transform 0.1s ease-out';
+    });
+    
+    el.addEventListener('mouseleave', () => {
+      const target = el.querySelector('img') || el;
+      target.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0px)';
+      // Slower transition back to rest
+      target.style.transition = 'transform 0.5s ease-in-out';
+    });
+  });
+
 });

@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{group_name}} — Chat | SAFAR</title>
   <meta name="description" content="Group chat for {{group_name}} on SAFAR — plan your tour together in real time.">
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="chat-page" data-group-id="{{group_id}}" data-username="{{username}}">
+<body class="chat-page" data-group-id="{{group_id}}" data-username="{{username}}" data-lang="en">
 
-<nav class="navbar">
-  <a href="/groups" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
-  <div class="nav-links" id="nav-links">
-    <a href="/groups">Groups</a>
-    <a href="/user" class="nav-badge">👤 {{username}}</a>
-    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+<!-- ═══ GITA BAR ═══ -->
+<div class="gita-bar" id="gita-quote-bar">
+  <span class="gita-bar-icon">📖</span>
+  <div class="gita-bar-text">
+    <span class="gita-sanskrit"></span>
+    <span class="gita-sep">·</span>
+    <span class="gita-translation"></span>
   </div>
-  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
-</nav>
+  <span class="gita-ref"></span>
+</div>
 
-<div class="chat-container" id="chat-container">
+<!-- ═══ MAIN CHAT LAYOUT ═══ -->
+<div class="chat-container" id="chat-container" style="margin-top: 37px;">
+
   <!-- Sidebar overlay (mobile) -->
   <div class="chat-sidebar-overlay" id="sidebar-overlay"></div>
 
-  <!-- Sidebar: Group info + Members -->
+  <!-- Chat Channel Sidebar -->
   <aside class="chat-sidebar" id="chat-sidebar">
     <div class="chat-sidebar-header">
       <h3>{{group_name}}</h3>
       <p>📍 {{destination_name or 'No destination set'}}</p>
       <div class="group-meta">
         <span>👥 {{member_count}} members</span>
-        <span id="online-status">●  <span id="online-count">0</span> online</span>
+        <span id="online-status">🪔 <span id="online-count">0</span> online</span>
       </div>
     </div>
     <div class="chat-search-box">
@@ -49,6 +52,13 @@
         </div>
       </div>
       {% endfor %}
+    </div>
+    <!-- Language toggle in sidebar -->
+    <div style="padding:12px 16px;border-top:1px solid var(--glass-border);margin-top:auto;">
+      <button id="lang-toggle-btn" style="width:100%;justify-content:center;">
+        <span class="lang-flag">🇮🇳</span>
+        <span class="lang-label">EN</span>
+      </button>
     </div>
   </aside>
 
@@ -80,13 +90,12 @@
 
       {% if not messages %}
       <div class="chat-empty" id="empty-state">
-        <div class="chat-empty-icon">💬</div>
+        <div class="chat-empty-icon">🪔</div>
         <h3>Start the conversation!</h3>
         <p>Send a message to begin planning your trip with the group.</p>
       </div>
       {% endif %}
 
-      <!-- Server-rendered messages -->
       {% for msg in messages %}
       <div class="msg-row {{'sent' if msg.sender_name == username else 'received'}}" data-sender="{{msg.sender_name}}" data-ts="{{msg.timestamp}}">
         <div class="msg-avatar">{{msg.sender_name[0]|upper}}</div>
@@ -110,7 +119,7 @@
       </div>
     </div>
 
-    <!-- Scroll to bottom FAB -->
+    <!-- Scroll FAB -->
     <button class="scroll-fab" id="scroll-fab">
       ↓
       <span class="unread-badge" id="unread-badge" style="display:none">0</span>
@@ -126,7 +135,6 @@
         <button class="chat-send-btn" id="send-btn" title="Send">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
-
         <!-- Emoji Picker -->
         <div class="emoji-picker" id="emoji-picker">
           <div class="emoji-tabs" id="emoji-tabs"></div>
@@ -137,7 +145,20 @@
   </div>
 </div>
 
+<!-- Gita Modal -->
+<div class="gita-modal-overlay" id="gita-full-modal">
+  <div class="gita-modal-box">
+    <div class="gita-modal-diya">🪔</div>
+    <div class="gita-modal-sanskrit"></div>
+    <div class="gita-modal-hindi"></div>
+    <div class="gita-modal-english"></div>
+    <div class="gita-modal-ref"></div>
+    <button class="gita-modal-close">✕ Close</button>
+  </div>
+</div>
+
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
 <script src="/static/group_chat.js"></script>
 <script src="/static/script.js"></script>
+<script src="/static/i18n.js"></script>
 </body></html>

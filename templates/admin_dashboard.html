@@ -7,14 +7,28 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="admin-page">
-<nav class="navbar">
-  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:15px">
-    <a href="/blockchain" class="badge badge-tt" style="text-decoration:none">⛓️ Identity Ledger Hub</a>
-    <span class="badge badge-ast">🛡️ Authority Dashboard</span>
-    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+<body class="admin-page" data-lang="en">
+  <!-- Gita Bar -->
+  <div class="gita-bar" id="gita-quote-bar">
+    <span class="gita-bar-icon">📖</span>
+    <div class="gita-bar-text">
+      <span class="gita-sanskrit"></span>
+      <span class="gita-sep">·</span>
+      <span class="gita-translation"></span>
+    </div>
+    <span class="gita-ref"></span>
   </div>
+
+<nav class="navbar navbar-with-bar" id="main-nav">
+  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+  <div class="nav-links" id="nav-links">
+    <a href="/blockchain" class="badge badge-tt" style="text-decoration:none" data-i18n="nav.identity">⛓️ Identity Ledger Hub</a>
+    <span class="badge badge-ast" data-i18n="nav.safety">🛡️ Admin Dashboard</span>
+    <div class="nav-divider"></div>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline" data-i18n="nav.logout">Logout</a>
+    <button id="lang-toggle-btn" title="Toggle Language"><span class="lang-flag">🇯🇳</span><span class="lang-label">EN</span></button>
+  </div>
+  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
 </nav>
 
 <div class="admin-layout">
@@ -135,6 +149,14 @@ async function refresh() {
       </div>`
     }).join('') : '<p style="color:var(--text3);font-size:0.85rem">No alerts recorded</p>';
 
+    // Audio Alert for New Panics
+    const currentSOS = ar.filter(a => a.alert_type.includes('Panic')).length;
+    if (window.lastSOSCount !== undefined && currentSOS > window.lastSOSCount && currentSOS > 0) {
+        document.getElementById('sos-audio').play().catch(()=>{}); // Play alert sound
+        alert('🚨 ATTENTION ADMIN: A NEW EMERGENCY SOS WAS JUST TRIGGERED!');
+    }
+    window.lastSOSCount = currentSOS;
+
     document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
   } catch(e) { console.error('Dashboard refresh failed:', e); }
 }
@@ -142,4 +164,18 @@ async function refresh() {
 refresh();
 setInterval(refresh, 10000);
 </script>
+<audio id="sos-audio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<!-- ZERO-LATENCY HARDWARE SOS LISTENER -->
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  socket.on('hardware_sos_triggered', function(data) {
+      document.getElementById('sos-audio').play().catch(()=>{}); // Play alert sound immediately
+      alert('🚨 ATTENTION ADMIN: A NEW EMERGENCY SOS WAS JUST TRIGGERED BY TOURIST ID ' + data.tourist_id + '!');
+      refresh(); // Immediately fetch the new alert into the list, bypassing the 10-second lag
+  });
+</script>
+<script src="/static/script.js"></script>
+<script src="/static/i18n.js"></script>
 </body></html>

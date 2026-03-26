@@ -6,6 +6,7 @@
     <title>SAFAR | Identity Ledger & Blockchain Auditor</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
     <style>
         :root {
             --bg: #05070a;
@@ -33,32 +34,18 @@
             min-height: 100vh;
         }
 
-        .navbar {
-            backdrop-filter: blur(12px);
-            background: rgba(5, 7, 10, 0.8);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        .blockchain-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
         }
-
-        .logo {
+        .blockchain-logo {
             font-weight: 800;
             font-size: 1.5rem;
             letter-spacing: -1px;
             background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem 5%;
         }
 
         /* Dashboard Overview */
@@ -252,18 +239,47 @@
         }
     </style>
 </head>
-<body>
+<body class="blockchain-page" data-lang="en" style="background-color: var(--bg);">
     <div class="scan-line"></div>
     
-    <nav class="navbar">
-        <div class="logo">SAFAR IDENTITY LEDGER</div>
-        <div class="identity-badge">
+    <!-- Gita Bar -->
+    <div class="gita-bar" id="gita-quote-bar">
+      <span class="gita-bar-icon">📖</span>
+      <div class="gita-bar-text">
+        <span class="gita-sanskrit"></span>
+        <span class="gita-sep">·</span>
+        <span class="gita-translation"></span>
+      </div>
+      <span class="gita-ref"></span>
+    </div>
+
+    <!-- Standard Navbar -->
+    <nav class="navbar navbar-with-bar" id="main-nav">
+      <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+      <div class="nav-links" id="nav-links">
+        <a href="/" data-i18n="nav.home">Home</a>
+        <a href="/groups" data-i18n="nav.groups">Groups</a>
+        <a href="/blockchain" class="active" data-i18n="nav.identity">Identity Ledger</a>
+        <a href="/travel" data-i18n="nav.ai">AI Assistant</a>
+        <a href="/about" data-i18n="nav.about">About</a>
+        <div class="nav-divider"></div>
+        <div class="identity-badge" style="margin-right: 15px;">
             <i class="fas fa-shield-halved" style="color:var(--success)"></i>
             NETWORK SECURITY: STABLE
         </div>
+        <a href="/profile" class="nav-badge ast" data-i18n="nav.safety">🛡️ Safety</a>
+        <button id="lang-toggle-btn" title="Toggle Language"><span class="lang-flag">🇯🇳</span><span class="lang-label">EN</span></button>
+      </div>
+      <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
     </nav>
 
-    <div class="container">
+    <!-- Majestic Airavat 3D Parallax Section -->
+    <div class="airavat-hero" data-tilt style="position:relative; height: 75vh; display:flex; align-items:center; justify-content:center; perspective: 1200px; overflow:hidden; border-bottom: 1px solid var(--border); cursor: none;">
+       <div class="airavat-bg" style="position:absolute; inset:0; background: radial-gradient(circle at center, rgba(0, 242, 254, 0.15), transparent 70%); z-index:1;"></div>
+       <img src="/static/images/airavat.png" id="airavat-mascot" class="reveal active" style="height: 110%; object-fit:contain; z-index:2; filter: drop-shadow(0 0 40px rgba(0, 242, 254, 0.3));" alt="">
+    </div>
+
+    <div class="blockchain-container">
         <div class="stats-grid">
             <div class="stat-card">
                 <h4>Total Blocks</h4>
@@ -393,6 +409,19 @@
             ];
             log(flavor[Math.floor(Math.random() * flavor.length)]);
         }, 8000);
+        // Parallax scroll effect for Airavat
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const airavat = document.getElementById('airavat-mascot');
+            if (airavat && scrolled < window.innerHeight) {
+                // Majestic slow rise and pop out
+                const translateY = 20 - (scrolled * 0.15);
+                const scale = 1 + (scrolled * 0.0003);
+                airavat.style.transform = `translateZ(80px) translateY(${translateY}px) scale(${scale})`;
+            }
+        });
     </script>
+    <script src="/static/script.js"></script>
+    <script src="/static/i18n.js"></script>
 </body>
 </html>

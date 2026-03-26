@@ -10,17 +10,61 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
-<body class="auth-page">
-  <div class="auth-split">
+<body class="auth-page" data-lang="en">
+
+<!-- Gita Bar -->
+<div class="gita-bar" id="gita-quote-bar" style="position:fixed;top:0;left:0;right:0;">
+  <span class="gita-bar-icon">📖</span>
+  <div class="gita-bar-text">
+    <span class="gita-sanskrit"></span>
+    <span class="gita-sep">·</span>
+    <span class="gita-translation"></span>
+  </div>
+  <span class="gita-ref"></span>
+  <!-- Lang toggle in gita bar -->
+  <button id="lang-toggle-btn" title="Toggle Language" style="margin-left:12px;">
+    <span class="lang-flag">🇯🇳</span>
+    <span class="lang-label">EN</span>
+  </button>
+</div>
+
+<!-- Mandala rotating background -->
+<div style="position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;">
+  <svg style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90vmin;height:90vmin;opacity:0.03;animation:mandala-spin 80s linear infinite;" viewBox="0 0 800 800" fill="none">
+    <circle cx="400" cy="400" r="380" stroke="#FF6B00" stroke-width="1.5"/>
+    <circle cx="400" cy="400" r="320" stroke="#F5C518" stroke-width="1"/>
+    <circle cx="400" cy="400" r="260" stroke="#00C9A7" stroke-width="1"/>
+    <circle cx="400" cy="400" r="200" stroke="#E91E8C" stroke-width="1"/>
+    <circle cx="400" cy="400" r="140" stroke="#FF6B00" stroke-width="0.8"/>
+    <circle cx="400" cy="400" r="80"  stroke="#F5C518" stroke-width="0.6"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#FF6B00" stroke-width="0.8" transform="rotate(0 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#F5C518" stroke-width="0.8" transform="rotate(30 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#00C9A7" stroke-width="0.8" transform="rotate(60 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#E91E8C" stroke-width="0.8" transform="rotate(90 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#FF6B00" stroke-width="0.8" transform="rotate(120 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#F5C518" stroke-width="0.8" transform="rotate(150 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#00C9A7" stroke-width="0.8" transform="rotate(180 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#E91E8C" stroke-width="0.8" transform="rotate(210 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#FF6B00" stroke-width="0.8" transform="rotate(240 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#F5C518" stroke-width="0.8" transform="rotate(270 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#00C9A7" stroke-width="0.8" transform="rotate(300 400 400)"/>
+    <ellipse cx="400" cy="30"  rx="22" ry="55" stroke="#E91E8C" stroke-width="0.8" transform="rotate(330 400 400)"/>
+  </svg>
+</div>
+
+  <div class="auth-split" style="margin-top:37px;">
     <!-- Left: Visual branding side -->
     <div class="auth-split-visual">
       <img src="/static/images/hero_bg.png" alt="Travel">
       <div class="hero-v2-overlay"></div>
       <div class="auth-split-visual-content">
-        <div style="font-size:3.5rem;margin-bottom:20px;">✈️</div>
+        <div style="font-size:3.5rem;margin-bottom:20px;animation:divaFlicker 2.5s ease-in-out infinite">🪤</div>
         <h2><span class="logo-safar" style="font-size:2.6rem">SAFAR</span></h2>
         <p style="margin-top:12px">Travel Smart. Travel Safe. Travel Together.</p>
-        <div style="display:flex;gap:20px;justify-content:center;margin-top:32px;">
+        <div style="font-family:'Tiro Devanagari Hindi',serif;font-size:0.85rem;color:rgba(245,197,24,0.8);margin-top:18px;line-height:1.7;">
+          कर्मण्येवाधिकारस्ते
+        </div>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:28px;">
           <div style="text-align:center">
             <div style="font-size:1.5rem;font-weight:800;color:var(--tt);font-family:'Syne',sans-serif">500+</div>
             <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px">Travelers</div>
@@ -187,6 +231,6 @@
 
     if (window.location.search.includes('register')) switchTab('register');
   </script>
+  <script src="/static/i18n.js"></script>
 </body>
-
 </html>

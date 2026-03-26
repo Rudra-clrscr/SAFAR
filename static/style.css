@@ -1,40 +1,85 @@
 /* =====================================================
    UNIFIED STYLE — SAFAR
-   GLASSMORPHISM EDITION
-   Fonts: Syne (display) + DM Sans (body)
+   INDIAN DISCORD EDITION 🪔
+   Inspired by: Discord layout × Indian Culture
+   Fonts: Outfit (display) + DM Sans (body) + Tiro Devanagari Hindi
    ===================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap');
 
 :root {
-  --bg: #080c16;
-  --bg2: #0d1221;
-  --bg3: #151d2e;
-  --surface: rgba(18, 26, 46, 0.55);
+  /* ── Base (Deep Midnight Indigo) ── */
+  --bg:  #0C0A15;
+  --bg2: #130F21;
+  --bg3: #1A1228;
+  --bg-sidebar: #0E0B1A;
+  --bg-channel: #110D1E;
+
+  /* ── Glass surfaces ── */
+  --surface:  rgba(26, 18, 40, 0.65);
   --surface2: rgba(255, 255, 255, 0.04);
-  --glass: rgba(15, 23, 42, 0.45);
-  --glass2: rgba(20, 30, 55, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-hi: rgba(255, 255, 255, 0.18);
-  --border: rgba(255, 255, 255, 0.07);
+  --glass:    rgba(20, 14, 35, 0.55);
+  --glass2:   rgba(30, 20, 55, 0.5);
+  --glass-border: rgba(255, 165, 80, 0.13);
+  --glass-hi:     rgba(255, 165, 80, 0.22);
+  --border:    rgba(255, 255, 255, 0.07);
   --border-hi: rgba(255, 255, 255, 0.14);
-  --text: #e8edf5;
-  --text2: #8fa0bc;
-  --text3: #5a6a80;
-  --tt: #00d4de;
-  --tt2: #00a8b5;
-  --tt-glow: rgba(0, 212, 222, 0.25);
-  --ast: #f59e0b;
-  --ast2: #d97706;
-  --ast-glow: rgba(245, 158, 11, 0.25);
+
+  /* ── Indian Palette ── */
+  --saffron:       #FF6B00;
+  --saffron2:      #E55A00;
+  --saffron-glow:  rgba(255, 107, 0, 0.32);
+
+  --sindoor:       #DC143C;
+  --sindoor2:      #B01030;
+  --sindoor-glow:  rgba(220, 20, 60, 0.28);
+
+  --peacock:       #00C9A7;
+  --peacock2:      #00A389;
+  --peacock-glow:  rgba(0, 201, 167, 0.28);
+
+  --turmeric:      #F5C518;
+  --turmeric2:     #D0A500;
+  --turmeric-glow: rgba(245, 197, 24, 0.28);
+
+  --lotus:         #E91E8C;
+  --lotus2:        #C2166B;
+  --lotus-glow:    rgba(233, 30, 140, 0.28);
+
+  --royal-indigo:  #6B4FE0;
+  --royal-indigo2: #5038C0;
+
+  /* ── Backward-compatible aliases ── */
+  --tt:      var(--peacock);
+  --tt2:     var(--peacock2);
+  --tt-glow: var(--peacock-glow);
+  --ast:     var(--turmeric);
+  --ast2:    var(--turmeric2);
+  --ast-glow: var(--turmeric-glow);
+
+  /* ── Text ── */
+  --text:  #EDE8F5;
+  --text2: #9A8BB8;
+  --text3: #5A4A72;
+
+  /* ── Status ── */
   --green: #22c55e;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --radius: 14px;
+  --red:   #ef4444;
+  --blue:  #3b82f6;
+
+  /* ── Shape / Shadow / Blur ── */
+  --radius:  14px;
   --radius2: 22px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  --shadow2: 0 20px 60px rgba(0, 0, 0, 0.6);
-  --blur: blur(18px);
-  --blur-heavy: blur(28px);
+  --shadow:  0 8px 32px rgba(0, 0, 0, 0.55);
+  --shadow2: 0 20px 60px rgba(0, 0, 0, 0.65);
+  --blur:        blur(18px);
+  --blur-heavy:  blur(28px);
+
+  /* ── Discord Layout ── */
+  --sidebar-w: 72px;
+  --channel-w: 240px;
+
+  /* ── 3D ── */
+  --perspective: 1200px;
 }
 
 *,
@@ -73,45 +118,50 @@ body::after {
 }
 
 body::before {
-  width: 600px;
-  height: 600px;
-  top: -10%;
-  left: -5%;
-  background: radial-gradient(circle, rgba(0, 212, 222, 0.15), transparent 70%);
+  width: 700px;
+  height: 700px;
+  top: -15%;
+  left: -8%;
+  background: radial-gradient(circle, rgba(0,201,167,0.12), transparent 70%);
   animation: orbFloat1 18s ease-in-out infinite;
 }
 
 body::after {
-  width: 500px;
-  height: 500px;
-  bottom: -5%;
-  right: -5%;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.12), transparent 70%);
+  width: 600px;
+  height: 600px;
+  bottom: -10%;
+  right: -8%;
+  background: radial-gradient(circle, rgba(255,107,0,0.10), transparent 70%);
   animation: orbFloat2 22s ease-in-out infinite;
 }
 
-@keyframes orbFloat1 {
-
-  0%,
-  100% {
-    transform: translate(0, 0)
-  }
-
-  50% {
-    transform: translate(80px, 60px)
-  }
+/* Third orb — lotus pink */
+body .orb3 {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  top: 40%;
+  left: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(120px);
+  opacity: 0.25;
+  background: radial-gradient(circle, rgba(233,30,140,0.18), transparent 70%);
+  animation: orbFloat3 28s ease-in-out infinite;
 }
 
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0,0) }
+  50%       { transform: translate(100px, 70px) }
+}
 @keyframes orbFloat2 {
-
-  0%,
-  100% {
-    transform: translate(0, 0)
-  }
-
-  50% {
-    transform: translate(-60px, -80px)
-  }
+  0%, 100% { transform: translate(0,0) }
+  50%       { transform: translate(-80px,-100px) }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(-50%,0) }
+  50%       { transform: translate(-50%, -60px) }
 }
 
 main {
@@ -143,7 +193,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 700;
   line-height: 1.2
 }
@@ -215,18 +265,18 @@ h6 {
   text-shadow: 0 0 12px var(--ast-glow)
 }
 
-/* SAFAR gradient logo text */
+/* SAFAR gradient logo — Saffron → Peacock gradient */
 .logo-safar {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
   font-size: 1.5rem;
   letter-spacing: 3px;
-  background: linear-gradient(135deg, var(--tt) 0%, #38bdf8 40%, var(--ast) 100%);
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--turmeric) 45%, var(--peacock) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: none;
-  filter: drop-shadow(0 0 12px rgba(0, 210, 190, 0.35));
+  filter: drop-shadow(0 0 14px rgba(255,107,0,0.4));
   text-transform: uppercase;
 }
 
@@ -4158,3 +4208,656 @@ footer p {
     padding: 8px 12px;
   }
 }
+
+/* =======================================================
+   🪔 INDIAN DISCORD ADDITIONS
+   Mandala · Animals · Gita Quotes · Language Toggle · 3D
+   ======================================================= */
+
+/* ── Language Toggle ───────────────────────── */
+#lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,107,0,0.08);
+  color: var(--saffron);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 1px;
+  font-family: 'Outfit', sans-serif;
+  backdrop-filter: blur(8px);
+}
+#lang-toggle-btn:hover {
+  background: rgba(255,107,0,0.18);
+  border-color: var(--saffron);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--saffron-glow);
+}
+#lang-toggle-btn.switching { opacity: 0; transform: scale(0.9); }
+.lang-flag { font-size: 1rem; }
+
+/* ── Gita Quote Bar ────────────────────────── */
+.gita-bar {
+  position: relative;
+  z-index: 850;
+  background: linear-gradient(90deg,
+    rgba(255,107,0,0.10),
+    rgba(245,197,24,0.08),
+    rgba(0,201,167,0.08),
+    rgba(255,107,0,0.10));
+  border-bottom: 1px solid rgba(255,165,0,0.15);
+  padding: 7px 5%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 0.4s;
+  backdrop-filter: blur(6px);
+}
+.gita-bar.fading { opacity: 0; }
+.gita-bar-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px var(--turmeric));
+}
+.gita-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.gita-sanskrit {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.82rem;
+  color: var(--turmeric);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+.gita-sep { color: var(--text3); flex-shrink: 0; }
+.gita-translation {
+  font-size: 0.8rem;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gita-ref {
+  font-size: 0.72rem;
+  color: var(--saffron);
+  font-style: italic;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 10px;
+}
+.gita-hint {
+  font-size: 0.72rem;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+
+/* Gita full shloka modal */
+.gita-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(12,10,21,0.88);
+  backdrop-filter: blur(12px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.gita-modal-overlay.open { display: flex; }
+.gita-modal-box {
+  background: var(--glass);
+  border: 1px solid rgba(245,197,24,0.25);
+  border-radius: var(--radius2);
+  padding: 36px;
+  max-width: 560px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 0 60px rgba(245,197,24,0.12), var(--shadow2);
+  text-align: center;
+}
+.gita-modal-diya { font-size: 2.5rem; margin-bottom: 16px; animation: divaFlicker 2s ease-in-out infinite; }
+.gita-modal-sanskrit {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 1.1rem;
+  color: var(--turmeric);
+  line-height: 1.8;
+  margin-bottom: 18px;
+  white-space: pre-line;
+}
+.gita-modal-hindi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.gita-modal-english {
+  font-size: 0.85rem;
+  color: var(--text2);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.gita-modal-ref {
+  font-size: 0.8rem;
+  color: var(--saffron);
+  margin-bottom: 20px;
+}
+.gita-modal-close {
+  background: none;
+  border: 1px solid var(--glass-border);
+  color: var(--text2);
+  padding: 6px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.2s;
+}
+.gita-modal-close:hover { border-color: var(--saffron); color: var(--saffron); }
+
+/* ── Indian Sacred Animals Section ─────────── */
+.animals-section {
+  padding: 90px 5%;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.animals-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 60%, rgba(255,107,0,0.06), transparent),
+    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(233,30,140,0.05), transparent);
+  pointer-events: none;
+}
+.animals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin-top: 50px;
+}
+.animal-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius2);
+  backdrop-filter: var(--blur);
+  padding: 32px 24px;
+  text-align: center;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s, border-color 0.4s;
+}
+.animal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.animal-card:hover { transform: perspective(var(--perspective)) translateY(-10px) rotateX(-4deg) scale(1.02); }
+
+/* Per-animal accent colors */
+.animal-card.airavat { border-color: rgba(107,79,224,0.3); }
+.animal-card.airavat:hover { box-shadow: 0 20px 60px rgba(107,79,224,0.3); border-color: rgba(107,79,224,0.6); }
+.animal-card.airavat::before { background: radial-gradient(circle at 50% 0%, rgba(107,79,224,0.12), transparent 60%); }
+.animal-card.airavat:hover::before { opacity: 1; }
+
+.animal-card.tiger { border-color: rgba(255,107,0,0.3); }
+.animal-card.tiger:hover { box-shadow: 0 20px 60px var(--saffron-glow); border-color: var(--saffron); }
+.animal-card.tiger::before { background: radial-gradient(circle at 50% 0%, rgba(255,107,0,0.12), transparent 60%); }
+.animal-card.tiger:hover::before { opacity: 1; }
+
+.animal-card.peacock { border-color: rgba(0,201,167,0.3); }
+.animal-card.peacock:hover { box-shadow: 0 20px 60px var(--peacock-glow); border-color: var(--peacock); }
+.animal-card.peacock::before { background: radial-gradient(circle at 50% 0%, rgba(0,201,167,0.12), transparent 60%); }
+.animal-card.peacock:hover::before { opacity: 1; }
+
+.animal-card.lotus { border-color: rgba(233,30,140,0.3); }
+.animal-card.lotus:hover { box-shadow: 0 20px 60px var(--lotus-glow); border-color: var(--lotus); }
+.animal-card.lotus::before { background: radial-gradient(circle at 50% 0%, rgba(233,30,140,0.12), transparent 60%); }
+.animal-card.lotus:hover::before { opacity: 1; }
+
+.animal-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 14px;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  transition: transform 0.4s;
+  transform-origin: bottom center;
+}
+.animal-card:hover .animal-emoji { transform: scale(1.18) translateY(-4px); }
+
+.animal-name-en {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.animal-name-sa {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 0.9rem;
+  color: var(--turmeric);
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.35s;
+}
+.animal-card:hover .animal-name-sa { opacity: 1; transform: translateY(0); }
+.animal-desc {
+  font-size: 0.83rem;
+  color: var(--text2);
+  line-height: 1.55;
+}
+.animal-rings {
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,165,0,0.08);
+  animation: mandala-spin 20s linear infinite;
+  pointer-events: none;
+}
+.animal-rings::before {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,165,0,0.05);
+  animation: mandala-spin-rev 14s linear infinite;
+}
+
+/* ── Mandala Background Decorations ─────────────── */
+.mandala-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.mandala-svg {
+  position: absolute;
+  opacity: 0.04;
+  animation: mandala-spin 60s linear infinite;
+}
+.mandala-svg.rev { animation: mandala-spin-rev 45s linear infinite; }
+.mandala-svg.slow { animation-duration: 90s; }
+
+@keyframes mandala-spin     { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+@keyframes mandala-spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg);   } }
+
+/* ── Diya Flame Keyframes ────────────────── */
+@keyframes divaFlicker {
+  0%,100% { transform: scale(1) rotate(-2deg); filter: drop-shadow(0 0 8px #FF6B00) drop-shadow(0 0 18px #F5C518); }
+  25%      { transform: scale(1.08) rotate(2deg);  filter: drop-shadow(0 0 14px #FF6B00) drop-shadow(0 0 28px #F5C518); }
+  50%      { transform: scale(0.96) rotate(-1deg); filter: drop-shadow(0 0 10px #FF6B00) drop-shadow(0 0 22px #E91E8C); }
+  75%      { transform: scale(1.05) rotate(3deg);  filter: drop-shadow(0 0 12px #FF6B00) drop-shadow(0 0 24px #F5C518); }
+}
+
+/* ── Golden Shimmer Border Keyframes ──────── */
+@keyframes border-shimmer {
+  0%   { border-color: rgba(245,197,24,0.2); box-shadow: 0 0 0 0 rgba(245,197,24,0); }
+  50%  { border-color: rgba(255,107,0,0.5);  box-shadow: 0 0 20px 2px rgba(255,107,0,0.15); }
+  100% { border-color: rgba(245,197,24,0.2); box-shadow: 0 0 0 0 rgba(245,197,24,0); }
+}
+.shimmer-border { animation: border-shimmer 3s ease-in-out infinite; }
+
+/* ── Card 3D Tilt System ──────────────────── */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s;
+  will-change: transform;
+}
+
+/* ── Rangoli Section Divider ─────────────── */
+.rangoli-divider {
+  width: 100%;
+  height: 2px;
+  margin: 0 auto;
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,107,0,0.4) 20%,
+    rgba(245,197,24,0.7) 35%,
+    rgba(0,201,167,0.7) 50%,
+    rgba(245,197,24,0.7) 65%,
+    rgba(233,30,140,0.4) 80%,
+    transparent 100%);
+}
+.rangoli-divider::before {
+  content: '💂';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 1.2rem;
+  background: var(--bg);
+  padding: 0 12px;
+}
+
+/* ── Navbar Gita bar offset ──────────────── */
+.navbar-with-bar { top: 37px; }
+body { padding-top: 0; }
+
+/* ── Discord App Sidebar ─────────────────── */
+.discord-app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 6px;
+  z-index: 200;
+  border-right: 1px solid rgba(255,165,0,0.07);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.discord-app-sidebar::-webkit-scrollbar { width: 0; }
+
+.dscrd-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
+  position: relative;
+  color: var(--text2);
+  background: var(--glass);
+  border: 1px solid transparent;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dscrd-icon:hover, .dscrd-icon.active {
+  border-radius: 16px;
+  color: var(--text);
+  background: rgba(255,107,0,0.12);
+  border-color: rgba(255,107,0,0.3);
+  box-shadow: 0 0 16px var(--saffron-glow);
+}
+.dscrd-icon.active { background: rgba(255,107,0,0.20); border-color: var(--saffron); }
+.dscrd-icon .dscrd-pip {
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+  width: 4px;
+  height: 8px;
+  background: var(--saffron);
+  border-radius: 0 3px 3px 0;
+  transition: all 0.2s;
+}
+.dscrd-icon.active .dscrd-pip, .dscrd-icon:hover .dscrd-pip {
+  transform: translateY(-50%) scaleX(1);
+  height: 20px;
+}
+.dscrd-sep {
+  width: 32px;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(255,165,0,0.15);
+  flex-shrink: 0;
+  margin: 2px 0;
+}
+.dscrd-home-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--saffron), var(--turmeric));
+  box-shadow: 0 0 18px var(--saffron-glow);
+  transition: border-radius 0.25s;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.dscrd-home-icon:hover { border-radius: 16px; }
+
+/* ── Feature card Indian glow upgrades ────── */
+.feature-card { transition: all 0.4s cubic-bezier(0.23,1,0.32,1); }
+.feature-card:hover {
+  transform: perspective(var(--perspective)) translateY(-8px) rotateX(-3deg) rotateY(2deg);
+  border-color: rgba(255,107,0,0.3);
+  box-shadow: 0 24px 60px rgba(255,107,0,0.15), 0 0 0 1px rgba(255,107,0,0.1);
+}
+.feature-icon {
+  background: linear-gradient(135deg, rgba(255,107,0,0.12), rgba(245,197,24,0.08));
+  border: 1px solid rgba(255,165,0,0.15);
+  color: var(--saffron);
+}
+.feature-icon.icon-ast { color: var(--turmeric); background: linear-gradient(135deg,rgba(245,197,24,0.12),rgba(233,30,140,0.08)); }
+.feature-icon.icon-danger { color: var(--sindoor); background: linear-gradient(135deg,rgba(220,20,60,0.12),rgba(255,107,0,0.08)); }
+
+/* ── Offer cards Indian upgrade ───────────── */
+.offer-card {
+  border: 1px solid rgba(255,165,0,0.14);
+  transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+.offer-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255,107,0,0.4);
+  box-shadow: 0 20px 50px rgba(255,107,0,0.14);
+}
+.offer-badge { background: linear-gradient(135deg,var(--saffron),var(--turmeric)); color:#000; font-weight:800; }
+
+/* ── Indian hero title glow ───────────────── */
+.tt-text  { color: var(--peacock); text-shadow: 0 0 35px var(--peacock-glow); }
+.ast-text { color: var(--turmeric); text-shadow: 0 0 35px var(--turmeric-glow); }
+.saffron-text { color: var(--saffron); text-shadow: 0 0 30px var(--saffron-glow); }
+
+/* ── Section tag Indian colors ────────────── */
+.section-tag-tt  { background:rgba(0,201,167,0.1); color:var(--peacock); border:1px solid rgba(0,201,167,0.2); }
+.section-tag-ast { background:rgba(245,197,24,0.1); color:var(--turmeric); border:1px solid rgba(245,197,24,0.2); }
+.section-tag-india { background:rgba(255,107,0,0.1); color:var(--saffron); border:1px solid rgba(255,107,0,0.2); }
+
+/* ── Destination cards 3D upgrade ────────── */
+.dest-card {
+  border: 1px solid rgba(255,165,0,0.1);
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s, border-color 0.4s;
+}
+.dest-card:hover {
+  border-color: rgba(255,107,0,0.4);
+  box-shadow: 0 20px 60px rgba(255,107,0,0.18);
+}
+
+/* ── CTA banner Indian gradient ────────────── */
+.cta-banner {
+  background:
+    radial-gradient(ellipse 80% 100% at 50% 100%, rgba(255,107,0,0.18), transparent),
+    radial-gradient(ellipse 60% 60% at 20% 30%, rgba(233,30,140,0.10), transparent),
+    var(--bg2);
+  border: 1px solid rgba(255,165,0,0.15);
+}
+
+/* ── Btn Indian color updates ─────────────── */
+.btn-tt  { background: linear-gradient(135deg,var(--peacock),var(--peacock2)); box-shadow:0 4px 15px var(--peacock-glow); }
+.btn-ast { background: linear-gradient(135deg,var(--saffron),var(--turmeric)); box-shadow:0 4px 15px var(--saffron-glow); color:#000; }
+.btn-nav-fill { background: linear-gradient(135deg,var(--saffron),var(--turmeric)); color:#000; box-shadow:0 2px 12px var(--saffron-glow); }
+
+/* ── Navbar active link ───────────────────── */
+.nav-links a.active { color:var(--saffron); background:rgba(255,107,0,0.10); }
+.nav-links a:hover  { color:var(--text); background:rgba(255,255,255,0.06); }
+.nav-badge { background:rgba(0,201,167,0.10); border:1px solid rgba(0,201,167,0.22); color:var(--peacock); }
+.nav-badge.ast { background:rgba(255,107,0,0.10); border-color:rgba(255,107,0,0.22); color:var(--saffron); }
+
+/* ── Footer V2 Indian touch ───────────────── */
+.footer-v2 {
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg-sidebar) 100%);
+  border-top: 1px solid rgba(255,165,0,0.12);
+  position: relative;
+  overflow: hidden;
+}
+.footer-v2::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(245,197,24,0.5),transparent);
+}
+
+/* ── Diya canvas layer ─────────────────────── */
+#diya-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+
+/* ── Scroll reveal animation ──────────────── */
+.reveal { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:none; }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ── Lotuspetal particles ─────────────────── */
+@keyframes petalFloat {
+  0%   { transform: translateY(0) rotate(0deg) scale(1);   opacity:0.7; }
+  100% { transform: translateY(-110vh) rotate(540deg) scale(0.5); opacity:0; }
+}
+.petal {
+  position:fixed;
+  pointer-events:none;
+  z-index:0;
+  font-size:1.1rem;
+  animation: petalFloat linear infinite;
+  will-change: transform;
+}
+
+/* ── Indian profile avatar ring ───────────── */
+.profile-pic {
+  background: linear-gradient(135deg,var(--saffron),var(--turmeric),var(--peacock));
+  box-shadow: 0 0 0 3px rgba(255,165,0,0.25), 0 0 24px var(--saffron-glow);
+}
+
+/* ── Data lang attribute font override ─────── */
+[data-lang='hi'] h1,
+[data-lang='hi'] h2,
+[data-lang='hi'] h3,
+[data-lang='sa'] h1,
+[data-lang='sa'] h2,
+[data-lang='sa'] h3,
+[data-lang='hi'] .section-tag,
+[data-lang='sa'] .section-tag,
+[data-lang='hi'] [data-i18n],
+[data-lang='sa'] [data-i18n] {
+  font-family: 'Tiro Devanagari Hindi', 'DM Sans', sans-serif;
+}
+
+/* ── Mobile adjustments for new sections ──── */
+@media (max-width: 768px) {
+  .animals-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .gita-bar { flex-wrap: wrap; padding: 8px 4%; }
+  .gita-translation { display: none; }
+  .lang-label { font-size: 0.72rem; }
+  .discord-app-sidebar { display:none; }
+}
+@media (max-width: 480px) {
+  .animals-grid { grid-template-columns: 1fr 1fr; }
+  .animal-emoji { font-size: 2.6rem; }
+  .gita-sanskrit { max-width: 200px; }
+/* ── CUSTOM CURSOR ────────────────────────── */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: difference;
+  background: white;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+}
+
+.custom-cursor.hovering {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 242, 254, 0.4);
+  mix-blend-mode: normal;
+  border: 1px solid rgba(0, 242, 254, 0.8);
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+}
+
+/* ── SMOOTH LOADER ────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  background-color: #05070a;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+}
+
+.loader-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 5px;
+  background: linear-gradient(135deg, #00f2fe, #4facfe, #00f5a0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.5; filter: drop-shadow(0 0 10px rgba(0,242,254,0.2)); }
+  50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px rgba(0,242,254,0.8)); }
+  100% { transform: scale(0.95); opacity: 0.5; filter: drop-shadow(0 0 10px rgba(0,242,254,0.2)); }
+}
+
+.page-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ── ENTRANCE REVEALS ─────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }

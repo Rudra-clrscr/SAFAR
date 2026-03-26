@@ -7,16 +7,37 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="safety-page">
-<nav class="navbar" id="main-nav">
+<body class="safety-page" data-lang="en">
+
+<!-- Gita Bar -->
+<div class="gita-bar" id="gita-quote-bar">
+  <span class="gita-bar-icon">📖</span>
+  <div class="gita-bar-text">
+    <span class="gita-sanskrit"></span>
+    <span class="gita-sep">·</span>
+    <span class="gita-translation"></span>
+  </div>
+  <span class="gita-ref"></span>
+</div>
+
+<nav class="navbar navbar-with-bar" id="main-nav">
   <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
   <div class="nav-links" id="nav-links">
-    <a href="/">Home</a><a href="/groups">Groups</a><a href="/blockchain">Identity Ledger</a>
-    <a href="/profile" class="nav-badge ast active">👤 User Profile</a>
-    <a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
+    <a href="/" data-i18n="nav.home">Home</a>
+    <a href="/groups" data-i18n="nav.groups">Groups</a>
+    <a href="/blockchain" data-i18n="nav.identity">Identity Ledger</a>
+    <a href="/profile" class="nav-badge ast active" data-i18n="nav.safety">🛡️ Safety</a>
+    <a href="/api/auth/logout" class="btn-nav btn-nav-outline" data-i18n="nav.logout">Logout</a>
+    <button id="lang-toggle-btn" title="Toggle Language"><span class="lang-flag">🇯🇳</span><span class="lang-label">EN</span></button>
   </div>
   <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
-</nav>
+  </nav>
+
+  <!-- Majestic Tiger 3D Parallax Section for Safety -->
+  <div class="tiger-hero" data-tilt style="position:relative; height: 60vh; display:flex; align-items:center; justify-content:center; perspective: 1200px; overflow:hidden; border-bottom: 1px solid var(--border); cursor: none;">
+     <div class="tiger-bg" style="position:absolute; inset:0; background: radial-gradient(circle at center, rgba(251, 146, 60, 0.15), transparent 70%); z-index:1;"></div>
+     <img src="/static/images/tiger.png" id="tiger-mascot" class="reveal active" style="height: 120%; object-fit:contain; z-index:2; filter: drop-shadow(0 0 50px rgba(251, 146, 60, 0.4));" alt="">
+  </div>
 
 <div class="safety-layout">
   <!-- Header -->
@@ -142,9 +163,18 @@ async function sendLocation() {
       });
       if (r.ok) {
         const d = await r.json();
+        
         document.getElementById('score-num').textContent = d.safety_score;
         const ring = document.getElementById('score-ring');
         ring.className = 'score-ring ' + (d.safety_score > 75 ? 'high' : d.safety_score > 40 ? 'medium' : 'low');
+        
+        // IoT Hardware SOS Popup Detection using Explicit Flag
+        if (d.is_panicking && sessionStorage.getItem('panicAlertShown') !== 'true') {
+            sessionStorage.setItem('panicAlertShown', 'true');
+            alert('🚨 HARDWARE SOS DETECTED: Your physical IoT SOS button was pushed. Authorities have been notified!');
+        } else if (!d.is_panicking) {
+            sessionStorage.removeItem('panicAlertShown'); // Reset when panic is cleared / expires
+        }
       }
     } catch(e) { setGPS('err', '❌ Sync failed'); }
   }, () => setGPS('err', '❌ GPS permission denied'), { enableHighAccuracy: true });
@@ -163,6 +193,7 @@ document.getElementById('panic-btn').addEventListener('click', async () => {
     if (r.ok) {
       document.getElementById('score-num').textContent = '0';
       document.getElementById('score-ring').className = 'score-ring low';
+      sessionStorage.setItem('panicAlertShown', 'true');
       alert('🆘 Panic alert sent. Authorities have been notified.');
     } else {
       const d = await r.json();
@@ -189,4 +220,34 @@ document.getElementById('panic-btn').addEventListener('click', async () => {
 
   window.onload = () => { initMap(); sendLocation(); setInterval(sendLocation, 15000); };
 </script>
+
+<!-- ZERO-LATENCY HARDWARE SOS LISTENER -->
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  socket.on('hardware_sos_triggered', function(data) {
+    if (String(data.tourist_id) === "{{ tourist.id }}") {
+        sessionStorage.setItem('panicAlertShown', 'true'); // Silence the 5-sec GPS loop
+        // Hard set score to 0 visually immediately
+        document.getElementById('score-num').textContent = '0';
+        document.getElementById('score-ring').className = 'score-ring low';
+        alert('🚨 HARDWARE SOS DETECTED: Your physical IoT SOS button was pushed. Authorities have been notified!');
+    }
+  });
+</script>
+
+<script>
+  // Parallax scroll effect for Tiger
+  window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      const tiger = document.getElementById('tiger-mascot');
+      if (tiger && scrolled < window.innerHeight) {
+          const translateY = 30 - (scrolled * 0.2);
+          const scale = 1 + (scrolled * 0.0004);
+          tiger.style.transform = `translateZ(80px) translateY(${translateY}px) scale(${scale})`;
+      }
+  });
+</script>
+
+<script src="/static/i18n.js"></script>
 </body></html>

@@ -1373,9 +1373,22 @@ def safety_update_location():
             tourist.safety_score = current_zone_score
         elif current_zone_score > 80 and tourist.safety_score < 100:
             tourist.safety_score = min(100, tourist.safety_score + 1)
+            
+    recent_panic = Alert.query.filter(
+        Alert.tourist_id == tourist.id,
+        Alert.alert_type == 'HARDWARE Panic',
+        Alert.timestamp > (datetime.now() - timedelta(seconds=60))
+    ).first()
+    
+    if recent_panic:
+        tourist.safety_score = 0 # Lock score at 0 during active panics
 
     db.session.commit()
-    return jsonify({'message': 'Location updated.', 'safety_score': tourist.safety_score}), 200
+    return jsonify({
+        'message': 'Location updated.', 
+        'safety_score': tourist.safety_score, 
+        'is_panicking': bool(recent_panic)
+    }), 200
 
 
 @app.route('/api/safety/panic', methods=['POST'])
@@ -1671,48 +1684,110 @@ def anomaly_loop():
         time.sleep(300)
 
 def blynk_loop():
-    """Polls Blynk Cloud for hardware SOS and GPS data every 30s."""
+    """Polls Blynk Cloud. SOS every 2s (instant reflex), GPS every 50s (battery save)."""
+    loop_count = 0
     while True:
         with app.app_context():
             try:
-                iot_users = Tourist.query.filter_by(iot_mode_enabled=True).all()
-                for user in iot_users:
+                users = Tourist.query.filter_by(iot_mode_enabled=True).all()
+                for user in users:
                     active_token = user.blynk_token or os.environ.get('BLYNK_AUTH_TOKEN')
                     if not active_token:
                         continue
                     
-                    # Fetch Virtual Pins individually to ensure cloud compatibility
                     base_url = f"https://blynk.cloud/external/api/get?token={active_token}"
                     
                     try:
-                        res_v1 = requests.get(f"{base_url}&V1", timeout=5)
-                        res_v2 = requests.get(f"{base_url}&V2", timeout=5)
-                        res_v3 = requests.get(f"{base_url}&V3", timeout=5)
-                        
-                        lat = res_v1.text.strip('[]"') if res_v1.status_code == 200 else None
-                        lon = res_v2.text.strip('[]"') if res_v2.status_code == 200 else None
+                        # 1. INSTANT SOS CHECK (Happens every 2 seconds)
+                        res_v3 = requests.get(f"{base_url}&V3", timeout=3)
                         sos_val = res_v3.text.strip('[]"') if res_v3.status_code == 200 else "0"
-
-                        # Update Location if hardware GPS is active and valid (not 0.0)
-                        if lat and lon and lat != "Invalid" and lon != "Invalid" and float(lat) != 0.0 and float(lon) != 0.0:
-                            user.last_known_location = f"Lat: {lat}, Lon: {lon}"
-                            user.last_updated_at = datetime.now()
                         
-                        # Trigger SOS Alert on physical button press (V3 == 1)
                         if str(sos_val) == "1":
-                            # Check if already alerted in the last 10 mins
-                            existing = Alert.query.filter_by(tourist_id=user.id, alert_type='HARDWARE SOS').order_by(Alert.timestamp.desc()).first()
-                            if not existing or (datetime.now() - existing.timestamp).seconds > 600:
-                                db.session.add(Alert(tourist_id=user.id, location=user.last_known_location, alert_type='HARDWARE SOS'))
-                                db.session.add(Anomaly(tourist_id=user.id, anomaly_type='Blynk Hardware SOS', description='Physical SOS button press detected via Blynk IoT Cloud.', status='active'))
+                            # Always broadcast so UI flashes immediately on any press
+                            socketio.emit('hardware_sos_triggered', {'tourist_id': user.id}, namespace='/')
+                            
+                            # Log every press immediately without cooldown restrictions
+                            db.session.add(Alert(tourist_id=user.id, location=user.last_known_location, alert_type='HARDWARE Panic'))
+                            db.session.add(Anomaly(tourist_id=user.id, anomaly_type='Blynk Hardware SOS', description='Physical SOS button press detected via Blynk IoT Cloud.', status='active'))
+                            user.safety_score = 0
+                            db.session.commit()
+                        
+                        # 2. GPS LOCATION CHECK (Happens every 125 loops * 0.4s = 50 seconds)
+                        if loop_count % 125 == 0:
+                            res_v1 = requests.get(f"{base_url}&V1", timeout=4)
+                            res_v2 = requests.get(f"{base_url}&V2", timeout=4)
+                            
+                            lat = res_v1.text.strip('[]"') if res_v1.status_code == 200 else None
+                            lon = res_v2.text.strip('[]"') if res_v2.status_code == 200 else None
+                            
+                            if lat and lon and lat != "Invalid" and lon != "Invalid" and float(lat) != 0.0 and float(lon) != 0.0:
+                                user.last_known_location = f"Lat: {lat}, Lon: {lon}"
+                                user.last_updated_at = datetime.now()
                         
                         db.session.commit()
                     except Exception as req_err:
-                        print(f"Blynk request error for {user.name}: {req_err}")
+                        # Log specific debug string for user awareness if blynk connection fails
+                        print(f"[Blynk Loop] Request error for {user.name} at V3: {req_err}")
                         
             except Exception as e:
                 print(f"Blynk loop error: {e}")
-        time.sleep(15) # Poll every 15 seconds for faster hardware reflex
+                
+        loop_count += 1
+        time.sleep(0.4) # Accelerated 400ms micro-poll to catch unmodified Arduino 1.2s momentary pulses
+
+def serial_monitor_loop():
+    """Reads directly from the ESP32 over USB (COM5) at 115200 baud for absolute 0-latency alerts."""
+    try:
+        import serial
+    except ImportError:
+        print("[USB Serial] PySerial not installed. Run: pip install pyserial")
+        return
+        
+    try:
+        ser = serial.Serial('COM5', 115200, timeout=1)
+        print("[USB Serial] 🟢 Successfully connected to COM5 directly! Bypassing cloud latency.")
+    except Exception as e:
+        print(f"[USB Serial] 🔴 Could not open COM5: {e}")
+        return
+
+    while True:
+        try:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
+                
+                if line:
+                    with app.app_context():
+                        # Link this hardware to the first Active IoT Tourist
+                        user = Tourist.query.filter(Tourist.iot_token.isnot(None), Tourist.iot_token != "").first()
+                        if not user:
+                            continue
+                            
+                        # 1. 0-LATENCY USB SOS TRIGGER
+                        if "SOS BUTTON PRESSED" in line.upper():
+                            print(f"[USB Serial] 🚨 INSTANT HARDWARE SOS DETECTED FROM COM3!!!")
+                            socketio.emit('hardware_sos_triggered', {'tourist_id': user.id}, namespace='/')
+                            
+                            db.session.add(Alert(tourist_id=user.id, location=user.last_known_location, alert_type='HARDWARE Panic'))
+                            db.session.add(Anomaly(tourist_id=user.id, anomaly_type='Direct USB Hardware SOS', description='Physical SOS button press detected via local USB COM3.', status='active'))
+                            user.safety_score = 0
+                            db.session.commit()
+                            
+                        # 2. LOCAL USB GPS TRACKING TRIGGER
+                        elif line.startswith("GPS:"):
+                            try:
+                                coords = line.replace("GPS:", "").split(",")
+                                if len(coords) == 2:
+                                    lat, lon = coords[0].strip(), coords[1].strip()
+                                    if float(lat) != 0.0 and float(lon) != 0.0:
+                                        user.last_known_location = f"Lat: {lat}, Lon: {lon}"
+                                        user.last_updated_at = datetime.now()
+                                        db.session.commit()
+                            except ValueError:
+                                pass # Incomplete or corrupt GPS stream
+                                
+        except Exception as e:
+            print(f"[USB Serial] 🔴 Communication Error: {e}")
+            time.sleep(2)
 
 def rakesh_db_agent():
     """High AI Agent 'Rakesh': Permanently monitors and self-heals the Supabase connection."""
@@ -1761,6 +1836,7 @@ def start_background_threads():
         app.threads_started = True
         threading.Thread(target=anomaly_loop, daemon=True).start()
         threading.Thread(target=blynk_loop, daemon=True).start()
+        threading.Thread(target=serial_monitor_loop, daemon=True).start()
         threading.Thread(target=rakesh_db_agent, daemon=True).start()
         print("[Agent Rakesh] 🕶️ Activated. Monitoring Supabase health in background...")
 

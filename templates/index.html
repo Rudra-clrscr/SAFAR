@@ -1,424 +1,584 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>SAFAR — Travel Smart. Travel Safe. Travel Together.</title>
-    <meta name="description" content="SAFAR is India's first AI-powered group travel platform with real-time tourist safety — plan trips, join travel communities, and explore with confidence.">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SAFAR — Travel Smart. Travel Safe. Travel Together.</title>
+  <meta name="description" content="SAFAR is India's first AI-powered group travel platform with real-time tourist safety — plan trips, join travel communities, and explore with confidence.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
-<body class="home-page">
-    <nav class="navbar" id="main-nav">
-        <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
-        <div class="nav-links" id="nav-links">
-            <a href="/" class="active">Home</a><a href="/groups">Groups</a><a href="/blockchain">Identity Ledger</a><a href="/travel">AI Assistant</a><a
-                href="/about">About</a>
-            <div class="nav-divider"></div>
-            {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/profile"
-                class="nav-badge ast">🛡️ Safety</a><a href="/api/auth/logout"
-                class="btn-nav btn-nav-outline">Logout</a>
-            {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth"
-                class="btn-nav btn-nav-fill">Get Started</a>{% endif %}
-        </div>
-        <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
-    </nav>
+<body class="home-page" data-lang="en">
 
-    <!-- ═══════ HERO WITH SEARCH WIDGET ═══════ -->
-    <section class="hero-v2" id="hero-section">
-        <div class="hero-v2-bg">
-            <img src="/static/images/hero_bg.png" alt="Travel destinations">
-            <div class="hero-v2-overlay"></div>
-        </div>
-        <div class="hero-v2-content">
-            <div class="hero-v2-left">
-                <span class="section-tag section-tag-tt">✈️ India's Smartest Travel Platform</span>
-                <h1>Travel Smart.<br><span class="tt-text">Travel Safe.</span><br><span class="ast-text">Travel Together.</span></h1>
-                <p>SAFAR combines AI-powered group travel with real-time tourist safety — discover destinations, build your travel squad, and explore India with confidence.</p>
-                <div class="hero-v2-stats">
-                    <div class="hero-stat">
-                        <span class="hero-stat-num" data-target="500">0</span>+
-                        <span class="hero-stat-label">Travelers</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-num" data-target="50">0</span>+
-                        <span class="hero-stat-label">Groups</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-num" data-target="17">0</span>
-                        <span class="hero-stat-label">Safety Zones</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-v2-right">
-                <!-- Yatra-style tabbed search widget -->
-                <div class="search-widget" id="search-widget">
-                    <div class="sw-tabs">
-                        <button class="sw-tab active" data-tab="sw-groups" id="sw-tab-groups">
-                            <i class="fas fa-users"></i>
-                            <span>Groups</span>
-                        </button>
-                        <button class="sw-tab" data-tab="sw-destinations" id="sw-tab-destinations">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Destinations</span>
-                        </button>
-                        <button class="sw-tab" data-tab="sw-safety" id="sw-tab-safety">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Safety</span>
-                        </button>
-                    </div>
-                    <!-- Groups Panel -->
-                    <div class="sw-panel active" id="sw-groups">
-                        <div class="sw-form">
-                            <div class="sw-field">
-                                <label>Where are you heading?</label>
-                                <input type="text" id="sw-dest-input" placeholder="e.g. Manali, Goa, Jaipur...">
-                            </div>
-                            <div class="sw-field-row">
-                                <div class="sw-field">
-                                    <label>Group Type</label>
-                                    <select id="sw-type-select">
-                                        <option value="All">All Types</option>
-                                        <option value="Public">Public</option>
-                                        <option value="Private">Private</option>
-                                    </select>
-                                </div>
-                                <div class="sw-field">
-                                    <label>Members</label>
-                                    <select id="sw-size-select">
-                                        <option value="any">Any Size</option>
-                                        <option value="small">1-5</option>
-                                        <option value="medium">6-15</option>
-                                        <option value="large">16+</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <a href="/groups" class="btn btn-tt sw-submit" id="sw-search-btn">
-                                <i class="fas fa-search"></i> Find Travel Groups
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Destinations Panel -->
-                    <div class="sw-panel" id="sw-destinations">
-                        <div class="sw-form">
-                            <div class="sw-field">
-                                <label>Explore Destinations</label>
-                                <input type="text" placeholder="Search cities, landmarks, states...">
-                            </div>
-                            <div class="sw-popular-tags">
-                                <span class="sw-tag">🏔️ Manali</span>
-                                <span class="sw-tag">🏖️ Goa</span>
-                                <span class="sw-tag">🏰 Jaipur</span>
-                                <span class="sw-tag">🌴 Kerala</span>
-                                <span class="sw-tag">🕌 Varanasi</span>
-                                <span class="sw-tag">🏔️ Ladakh</span>
-                            </div>
-                            <a href="/groups" class="btn btn-tt sw-submit">
-                                <i class="fas fa-compass"></i> Browse Destinations
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Safety Panel -->
-                    <div class="sw-panel" id="sw-safety">
-                        <div class="sw-form">
-                            <div class="sw-field">
-                                <label>Check Safety Score</label>
-                                <input type="text" placeholder="Enter your current location...">
-                            </div>
-                            <div class="sw-safety-info">
-                                <div class="sw-safety-item safe">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>17 monitored safety zones across India</span>
-                                </div>
-                                <div class="sw-safety-item safe">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Real-time GPS tracking & anomaly detection</span>
-                                </div>
-                                <div class="sw-safety-item safe">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>One-tap panic button with instant alerts</span>
-                                </div>
-                            </div>
-                            <a href="/profile" class="btn btn-ast sw-submit">
-                                <i class="fas fa-shield-alt"></i> Open Safety Dashboard
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- ═══ LOTUS PETAL PARTICLES (injected by JS) ═══ -->
+  <div id="petals-container"></div>
 
-    <!-- ═══════ POPULAR DESTINATIONS ═══════ -->
-    <section class="destinations-section" id="destinations-section">
-        <div class="section-header">
-            <span class="section-tag section-tag-tt">Explore India</span>
-            <h2>Popular Destinations</h2>
-            <p>Join travel squads headed to India's most loved destinations</p>
-        </div>
-        <div class="dest-grid">
-            <a href="/groups" class="dest-card dest-card-lg" id="dest-card-manali">
-                <img src="/static/images/dest_manali.png" alt="Manali" loading="lazy">
-                <div class="dest-card-overlay">
-                    <span class="dest-card-tag">🏔️ Adventure</span>
-                    <h3>Manali</h3>
-                    <p>Himalayan paradise for adventure seekers</p>
-                    <span class="dest-card-cta">Explore Groups →</span>
-                </div>
-            </a>
-            <a href="/groups" class="dest-card" id="dest-card-goa">
-                <img src="/static/images/dest_goa.png" alt="Goa" loading="lazy">
-                <div class="dest-card-overlay">
-                    <span class="dest-card-tag">🏖️ Beach</span>
-                    <h3>Goa</h3>
-                    <p>Sun, sand & unforgettable vibes</p>
-                    <span class="dest-card-cta">Explore Groups →</span>
-                </div>
-            </a>
-            <a href="/groups" class="dest-card" id="dest-card-jaipur">
-                <img src="/static/images/dest_jaipur.png" alt="Jaipur" loading="lazy">
-                <div class="dest-card-overlay">
-                    <span class="dest-card-tag">🏰 Heritage</span>
-                    <h3>Jaipur</h3>
-                    <p>The Pink City's royal grandeur</p>
-                    <span class="dest-card-cta">Explore Groups →</span>
-                </div>
-            </a>
-            <a href="/groups" class="dest-card" id="dest-card-kerala">
-                <img src="/static/images/dest_kerala.png" alt="Kerala" loading="lazy">
-                <div class="dest-card-overlay">
-                    <span class="dest-card-tag">🌴 Nature</span>
-                    <h3>Kerala</h3>
-                    <p>God's own country — backwaters & tea gardens</p>
-                    <span class="dest-card-cta">Explore Groups →</span>
-                </div>
-            </a>
-            <a href="/groups" class="dest-card dest-card-lg" id="dest-card-varanasi">
-                <img src="/static/images/dest_varanasi.png" alt="Varanasi" loading="lazy">
-                <div class="dest-card-overlay">
-                    <span class="dest-card-tag">🕌 Spiritual</span>
-                    <h3>Varanasi</h3>
-                    <p>Ancient ghats & sacred Ganges</p>
-                    <span class="dest-card-cta">Explore Groups →</span>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- ═══════ FEATURES / WHY CHOOSE US ═══════ -->
-    <section class="features-section" id="features-section">
-        <div class="section-header">
-            <span class="section-tag section-tag-tt">The SAFAR Advantage</span>
-            <h2>Everything You Need for Smart Travel</h2>
-            <p>One platform. Group planning. AI safety. Real-time tracking.</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card" id="feature-group-travel">
-                <div class="feature-icon"><i class="fas fa-plane-departure"></i></div>
-                <h3>Travel Squads</h3>
-                <p>Create or join travel groups, plan destinations together, and stay connected with real-time group chat.</p>
-            </div>
-            <div class="feature-card" id="feature-tourist-safety">
-                <div class="feature-icon icon-ast"><i class="fas fa-shield-alt"></i></div>
-                <h3>Tourist Safety</h3>
-                <p>Real-time GPS tracking, geo-fenced safety zones, anomaly detection, and a one-tap panic button.</p>
-            </div>
-            <div class="feature-card" id="feature-ai-assistant">
-                <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                <h3>AI Travel Assistant</h3>
-                <p>Get personalized travel recommendations, safety tips, and destination insights from our AI engine.</p>
-            </div>
-            <div class="feature-card" id="feature-geo-fencing">
-                <div class="feature-icon icon-ast"><i class="fas fa-map-pin"></i></div>
-                <h3>Smart Geo-Fencing</h3>
-                <p>Automatic safety scoring based on your location, with alerts when entering high-risk zones.</p>
-            </div>
-            <div class="feature-card" id="feature-panic-button">
-                <div class="feature-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
-                <h3>Panic Button</h3>
-                <p>One-tap emergency alert that instantly notifies authorities with your real-time location.</p>
-            </div>
-            <div class="feature-card" id="feature-realtime-chat">
-                <div class="feature-icon"><i class="fas fa-comment-dots"></i></div>
-                <h3>Real-Time Chat</h3>
-                <p>Stay in touch with your travel squad through socket-powered instant messaging.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════ SPECIAL OFFERS / BENEFITS ═══════ -->
-    <section class="offers-section" id="offers-section">
-        <div class="section-header">
-            <span class="section-tag section-tag-ast">Why SAFAR</span>
-            <h2>Built for Travelers, Backed by AI</h2>
-        </div>
-        <div class="offers-row">
-            <div class="offer-card" id="offer-free">
-                <div class="offer-badge">FREE</div>
-                <div class="offer-icon">🎉</div>
-                <h4>100% Free Platform</h4>
-                <p>No subscriptions, no hidden fees. Travel together without spending a rupee on the app.</p>
-            </div>
-            <div class="offer-card" id="offer-ai">
-                <div class="offer-badge">AI</div>
-                <div class="offer-icon">🤖</div>
-                <h4>AI-Powered Intelligence</h4>
-                <p>Our anomaly detection system monitors travel patterns and flags unusual activity in real time.</p>
-            </div>
-            <div class="offer-card" id="offer-verified">
-                <div class="offer-badge">KYC</div>
-                <div class="offer-icon">✅</div>
-                <h4>Verified Travelers</h4>
-                <p>Every tourist is KYC-verified with Aadhaar/Passport for a safe and trusted travel community.</p>
-            </div>
-            <div class="offer-card" id="offer-realtime">
-                <div class="offer-badge">LIVE</div>
-                <div class="offer-icon">📡</div>
-                <h4>Real-Time Everything</h4>
-                <p>Live GPS, live chat, live safety scores — every feature updates instantly.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════ CTA BANNER ═══════ -->
-    <section class="cta-banner" id="cta-section">
-        <div class="cta-banner-content">
-            <h2>Ready for Your Next Adventure?</h2>
-            <p>Join thousands of travelers who explore India smartly and safely with SAFAR.</p>
-            <div class="cta-banner-btns">
-                <a href="/auth" class="btn btn-tt btn-lg">Start Your Journey — Free</a>
-                <a href="/travel" class="btn btn-ghost btn-lg">🤖 Talk to AI Assistant</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════ ENHANCED FOOTER ═══════ -->
-    <footer class="footer-v2" id="main-footer">
-        <div class="footer-v2-grid">
-            <div class="footer-v2-brand">
-                <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
-                <p>India's first AI-powered group travel platform with real-time tourist safety. Plan smart, travel safe.</p>
-                <div class="footer-social">
-                    <a href="#" class="social-link" id="social-twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-link" id="social-instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link" id="social-linkedin"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="social-link" id="social-github"><i class="fab fa-github"></i></a>
-                </div>
-            </div>
-            <div class="footer-v2-col">
-                <h4>Quick Links</h4>
-                <a href="/">Home</a>
-                <a href="/groups">Find Groups</a>
-                <a href="/travel">AI Assistant</a>
-                <a href="/blockchain">Identity Ledger Hub</a>
-                <a href="/about">About Us</a>
-            </div>
-            <div class="footer-v2-col">
-                <h4>Safety</h4>
-                <a href="/profile">Safety Dashboard</a>
-                <a href="/admin">Admin Panel</a>
-                <a href="/auth">Register Tourist</a>
-                <a href="#">Safety Zones</a>
-            </div>
-            <div class="footer-v2-col">
-                <h4>Resources</h4>
-                <a href="#">Travel Tips</a>
-                <a href="#">Emergency Contacts</a>
-                <a href="#">KYC Guidelines</a>
-                <a href="#">Privacy Policy</a>
-            </div>
-        </div>
-        <div class="footer-v2-bottom">
-            <p>© 2025 SAFAR — Built with ❤️ by Team Safar</p>
-        </div>
-    </footer>
-
-    <!-- Chatbot -->
-    <button class="chatbot-fab" id="chatbot-fab">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-        </svg>
-    </button>
-    <div class="chatbot-panel" id="chatbot-panel">
-        <div class="chatbot-header">
-            <h3>🤖 SAFAR AI</h3>
-            <div class="chatbot-header-btns">
-                <button id="chatbot-clear">↺</button>
-                <button id="chatbot-close">✕</button>
-            </div>
-        </div>
-        <div class="chatbot-messages" id="chatbot-msgs">
-            <div class="chat-msg bot">
-                <p>✈️ Hi! I'm your SAFAR AI assistant. How can I help you plan your next trip?</p>
-            </div>
-        </div>
-        <div class="chatbot-input-row">
-            <input type="text" id="chatbot-input" placeholder="Ask me anything about travel...">
-            <button class="chatbot-send" id="chatbot-send">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                </svg>
-            </button>
-        </div>
+  <!-- ═══ BHAGAVAD GITA QUOTE BAR ═══ -->
+  <div class="gita-bar" id="gita-quote-bar">
+    <span class="gita-bar-icon">📖</span>
+    <div class="gita-bar-text">
+      <span class="gita-sanskrit"></span>
+      <span class="gita-sep">·</span>
+      <span class="gita-translation"></span>
     </div>
-    <script src="/static/script.js"></script>
-    <script>
-    // ── Search Widget Tab Switching ──
-    document.querySelectorAll('.sw-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.sw-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.sw-panel').forEach(p => p.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
-        });
-    });
+    <span class="gita-ref"></span>
+    <span class="gita-hint">click to expand</span>
+  </div>
 
-    // ── Animated Counters ──
-    function animateCounters() {
-        document.querySelectorAll('.hero-stat-num').forEach(el => {
-            const target = parseInt(el.dataset.target);
-            const duration = 2000;
-            const step = target / (duration / 16);
-            let current = 0;
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= target) {
-                    el.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    el.textContent = Math.floor(current);
-                }
-            }, 16);
-        });
+  <!-- ═══ NAVBAR ═══ -->
+  <nav class="navbar navbar-with-bar" id="main-nav">
+    <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+    <div class="nav-links" id="nav-links">
+      <a href="/" class="active" data-i18n="nav.home">Home</a>
+      <a href="/groups" data-i18n="nav.groups">Groups</a>
+      <a href="/blockchain" data-i18n="nav.identity">Identity Ledger</a>
+      <a href="/travel" data-i18n="nav.ai">AI Assistant</a>
+      <a href="/about" data-i18n="nav.about">About</a>
+      <div class="nav-divider"></div>
+      {% if username %}
+        <a href="/user" class="nav-badge">👤 {{username}}</a>
+        <a href="/profile" class="nav-badge ast" data-i18n="nav.safety">🛡️ Safety</a>
+        <a href="/api/auth/logout" class="btn-nav btn-nav-outline" data-i18n="nav.logout">Logout</a>
+      {% else %}
+        <a href="/auth" class="btn-nav btn-nav-outline" data-i18n="nav.login">Login</a>
+        <a href="/auth" class="btn-nav btn-nav-fill" data-i18n="nav.getstarted">Get Started</a>
+      {% endif %}
+      <!-- Language Toggle -->
+      <button id="lang-toggle-btn" title="Toggle Language">
+        <span class="lang-flag">🇮🇳</span>
+        <span class="lang-label">EN</span>
+      </button>
+    </div>
+    <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+  </nav>
+
+
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero-v2" id="hero-section" style="position:relative;overflow:hidden;">
+
+    <!-- Mandala background decorations -->
+    <div class="mandala-bg">
+      <svg class="mandala-svg" style="width:600px;height:600px;top:-100px;left:-100px;" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="300" cy="300" r="280" stroke="#FF6B00" stroke-width="1"/>
+        <circle cx="300" cy="300" r="240" stroke="#F5C518" stroke-width="0.8"/>
+        <circle cx="300" cy="300" r="200" stroke="#00C9A7" stroke-width="0.6"/>
+        <circle cx="300" cy="300" r="160" stroke="#E91E8C" stroke-width="0.5"/>
+        <circle cx="300" cy="300" r="120" stroke="#FF6B00" stroke-width="0.4"/>
+        <circle cx="300" cy="300" r="80" stroke="#F5C518" stroke-width="0.3"/>
+        <circle cx="300" cy="300" r="40" stroke="#00C9A7" stroke-width="0.3"/>
+        <!-- Petals -->
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#FF6B00" stroke-width="0.6" transform="rotate(0 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#F5C518" stroke-width="0.6" transform="rotate(30 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#00C9A7" stroke-width="0.6" transform="rotate(60 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#E91E8C" stroke-width="0.6" transform="rotate(90 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#FF6B00" stroke-width="0.6" transform="rotate(120 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#F5C518" stroke-width="0.6" transform="rotate(150 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#00C9A7" stroke-width="0.6" transform="rotate(180 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#E91E8C" stroke-width="0.6" transform="rotate(210 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#FF6B00" stroke-width="0.6" transform="rotate(240 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#F5C518" stroke-width="0.6" transform="rotate(270 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#00C9A7" stroke-width="0.6" transform="rotate(300 300 300)"/>
+        <ellipse cx="300" cy="60" rx="18" ry="40" fill="none" stroke="#E91E8C" stroke-width="0.6" transform="rotate(330 300 300)"/>
+      </svg>
+      <svg class="mandala-svg rev slow" style="width:500px;height:500px;bottom:-80px;right:-80px;" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="250" cy="250" r="230" stroke="#F5C518" stroke-width="0.8"/>
+        <circle cx="250" cy="250" r="190" stroke="#E91E8C" stroke-width="0.6"/>
+        <circle cx="250" cy="250" r="150" stroke="#00C9A7" stroke-width="0.5"/>
+        <circle cx="250" cy="250" r="110" stroke="#FF6B00" stroke-width="0.4"/>
+        <circle cx="250" cy="250" r="70"  stroke="#F5C518" stroke-width="0.3"/>
+      </svg>
+      <!-- Diya canvas for flame particles -->
+      <canvas id="diya-canvas"></canvas>
+    </div>
+
+    <div class="hero-v2-bg">
+      <img src="/static/images/hero_bg.png" alt="Travel destinations">
+      <div class="hero-v2-overlay"></div>
+    </div>
+    <div class="hero-v2-content">
+      <div class="hero-v2-left">
+        <span class="section-tag section-tag-tt" data-i18n="hero.tag">✈️ India's Smartest Travel Platform</span>
+        <h1>
+          <span data-i18n="hero.h1a">Travel Smart.</span><br>
+          <span class="tt-text" data-i18n="hero.h1b">Travel Safe.</span><br>
+          <span class="ast-text" data-i18n="hero.h1c">Travel Together.</span>
+        </h1>
+        <p data-i18n="hero.desc">SAFAR combines AI-powered group travel with real-time tourist safety — discover destinations, build your travel squad, and explore India with confidence.</p>
+        <div class="hero-v2-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-target="500">0</span>+
+            <span class="hero-stat-label" data-i18n="hero.stat.travelers">Travelers</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-target="50">0</span>+
+            <span class="hero-stat-label" data-i18n="hero.stat.groups">Groups</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-target="17">0</span>
+            <span class="hero-stat-label" data-i18n="hero.stat.zones">Safety Zones</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-v2-right">
+        <!-- Search Widget -->
+        <div class="search-widget" id="search-widget">
+          <div class="sw-tabs">
+            <button class="sw-tab active" data-tab="sw-groups" id="sw-tab-groups">
+              <i class="fas fa-users"></i><span data-i18n="sw.tab.groups">Groups</span>
+            </button>
+            <button class="sw-tab" data-tab="sw-destinations" id="sw-tab-destinations">
+              <i class="fas fa-map-marker-alt"></i><span data-i18n="sw.tab.destinations">Destinations</span>
+            </button>
+            <button class="sw-tab" data-tab="sw-safety" id="sw-tab-safety">
+              <i class="fas fa-shield-alt"></i><span data-i18n="sw.tab.safety">Safety</span>
+            </button>
+          </div>
+          <div class="sw-panel active" id="sw-groups">
+            <div class="sw-form">
+              <div class="sw-field">
+                <label data-i18n="sw.label.heading">Where are you heading?</label>
+                <input type="text" id="sw-dest-input" data-i18n-placeholder="sw.placeholder.dest" placeholder="e.g. Manali, Goa, Jaipur...">
+              </div>
+              <div class="sw-field-row">
+                <div class="sw-field">
+                  <label data-i18n="sw.label.grouptype">Group Type</label>
+                  <select id="sw-type-select">
+                    <option value="All" data-i18n="sw.opt.alltypes">All Types</option>
+                    <option value="Public" data-i18n="sw.opt.public">Public</option>
+                    <option value="Private" data-i18n="sw.opt.private">Private</option>
+                  </select>
+                </div>
+                <div class="sw-field">
+                  <label data-i18n="sw.label.members">Members</label>
+                  <select id="sw-size-select">
+                    <option value="any" data-i18n="sw.opt.anysize">Any Size</option>
+                    <option value="small">1-5</option>
+                    <option value="medium">6-15</option>
+                    <option value="large">16+</option>
+                  </select>
+                </div>
+              </div>
+              <a href="/groups" class="btn btn-tt sw-submit" id="sw-search-btn">
+                <i class="fas fa-search"></i> <span data-i18n="sw.btn.findgroups">Find Travel Groups</span>
+              </a>
+            </div>
+          </div>
+          <div class="sw-panel" id="sw-destinations">
+            <div class="sw-form">
+              <div class="sw-field">
+                <label data-i18n="sw.label.explore">Explore Destinations</label>
+                <input type="text" data-i18n-placeholder="sw.placeholder.search" placeholder="Search cities, landmarks, states...">
+              </div>
+              <div class="sw-popular-tags">
+                <span class="sw-tag">🏔️ Manali</span><span class="sw-tag">🏖️ Goa</span>
+                <span class="sw-tag">🏰 Jaipur</span><span class="sw-tag">🌴 Kerala</span>
+                <span class="sw-tag">🕌 Varanasi</span><span class="sw-tag">🏔️ Ladakh</span>
+              </div>
+              <a href="/groups" class="btn btn-tt sw-submit">
+                <i class="fas fa-compass"></i> <span data-i18n="sw.btn.browse">Browse Destinations</span>
+              </a>
+            </div>
+          </div>
+          <div class="sw-panel" id="sw-safety">
+            <div class="sw-form">
+              <div class="sw-field">
+                <label data-i18n="sw.label.safety">Check Safety Score</label>
+                <input type="text" data-i18n-placeholder="sw.placeholder.location" placeholder="Enter your current location...">
+              </div>
+              <div class="sw-safety-info">
+                <div class="sw-safety-item safe"><i class="fas fa-check-circle"></i><span data-i18n="sw.safety.zones">17 monitored safety zones across India</span></div>
+                <div class="sw-safety-item safe"><i class="fas fa-check-circle"></i><span data-i18n="sw.safety.gps">Real-time GPS tracking &amp; anomaly detection</span></div>
+                <div class="sw-safety-item safe"><i class="fas fa-check-circle"></i><span data-i18n="sw.safety.sos">One-tap panic button with instant alerts</span></div>
+              </div>
+              <a href="/profile" class="btn btn-ast sw-submit">
+                <i class="fas fa-shield-alt"></i> <span data-i18n="sw.btn.dashboard">Open Safety Dashboard</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rangoli Divider -->
+  <div class="rangoli-divider" style="margin:0 5%" aria-hidden="true"></div>
+
+  <!-- ═══ POPULAR DESTINATIONS ═══ -->
+  <section class="destinations-section reveal" id="destinations-section">
+    <div class="section-header">
+      <span class="section-tag section-tag-tt" data-i18n="dest.tag">Explore India</span>
+      <h2 data-i18n="dest.h2">Popular Destinations</h2>
+      <p data-i18n="dest.sub">Join travel squads headed to India's most loved destinations</p>
+    </div>
+    <div class="dest-grid">
+      <a href="/groups" class="dest-card dest-card-lg card-3d" id="dest-card-manali">
+        <img src="/static/images/dest_manali.png" alt="Manali" loading="lazy">
+        <div class="dest-card-overlay">
+          <span class="dest-card-tag">🏔️ Adventure</span>
+          <h3>Manali</h3>
+          <p>Himalayan paradise for adventure seekers</p>
+          <span class="dest-card-cta" data-i18n="dest.explore">Explore Groups →</span>
+        </div>
+      </a>
+      <a href="/groups" class="dest-card card-3d" id="dest-card-goa">
+        <img src="/static/images/dest_goa.png" alt="Goa" loading="lazy">
+        <div class="dest-card-overlay">
+          <span class="dest-card-tag">🏖️ Beach</span>
+          <h3>Goa</h3>
+          <p>Sun, sand &amp; unforgettable vibes</p>
+          <span class="dest-card-cta" data-i18n="dest.explore">Explore Groups →</span>
+        </div>
+      </a>
+      <a href="/groups" class="dest-card card-3d" id="dest-card-jaipur">
+        <img src="/static/images/dest_jaipur.png" alt="Jaipur" loading="lazy">
+        <div class="dest-card-overlay">
+          <span class="dest-card-tag">🏰 Heritage</span>
+          <h3>Jaipur</h3>
+          <p>The Pink City's royal grandeur</p>
+          <span class="dest-card-cta" data-i18n="dest.explore">Explore Groups →</span>
+        </div>
+      </a>
+      <a href="/groups" class="dest-card card-3d" id="dest-card-kerala">
+        <img src="/static/images/dest_kerala.png" alt="Kerala" loading="lazy">
+        <div class="dest-card-overlay">
+          <span class="dest-card-tag">🌴 Nature</span>
+          <h3>Kerala</h3>
+          <p>God's own country — backwaters &amp; tea gardens</p>
+          <span class="dest-card-cta" data-i18n="dest.explore">Explore Groups →</span>
+        </div>
+      </a>
+      <a href="/groups" class="dest-card dest-card-lg card-3d" id="dest-card-varanasi">
+        <img src="/static/images/dest_varanasi.png" alt="Varanasi" loading="lazy">
+        <div class="dest-card-overlay">
+          <span class="dest-card-tag">🕌 Spiritual</span>
+          <h3>Varanasi</h3>
+          <p>Ancient ghats &amp; sacred Ganges</p>
+          <span class="dest-card-cta" data-i18n="dest.explore">Explore Groups →</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Rangoli Divider -->
+  <div class="rangoli-divider" style="margin:0 5%" aria-hidden="true"></div>
+
+  <!-- ═══ FEATURES ═══ -->
+  <section class="features-section reveal" id="features-section">
+    <div class="section-header">
+      <span class="section-tag section-tag-tt" data-i18n="feat.tag">The SAFAR Advantage</span>
+      <h2 data-i18n="feat.h2">Everything You Need for Smart Travel</h2>
+      <p data-i18n="feat.sub">One platform. Group planning. AI safety. Real-time tracking.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card card-3d reveal reveal-delay-1" id="feature-group-travel">
+        <div class="feature-icon"><i class="fas fa-plane-departure"></i></div>
+        <h3 data-i18n="feat.squads.title">Travel Squads</h3>
+        <p data-i18n="feat.squads.desc">Create or join travel groups, plan destinations together, and stay connected with real-time group chat.</p>
+      </div>
+      <div class="feature-card card-3d reveal reveal-delay-2" id="feature-tourist-safety">
+        <div class="feature-icon icon-ast"><i class="fas fa-shield-alt"></i></div>
+        <h3 data-i18n="feat.safety.title">Tourist Safety</h3>
+        <p data-i18n="feat.safety.desc">Real-time GPS tracking, geo-fenced safety zones, anomaly detection, and a one-tap panic button.</p>
+      </div>
+      <div class="feature-card card-3d reveal reveal-delay-3" id="feature-ai-assistant">
+        <div class="feature-icon"><i class="fas fa-robot"></i></div>
+        <h3 data-i18n="feat.ai.title">AI Travel Assistant</h3>
+        <p data-i18n="feat.ai.desc">Get personalized travel recommendations, safety tips, and destination insights from our AI engine.</p>
+      </div>
+      <div class="feature-card card-3d reveal reveal-delay-1" id="feature-geo-fencing">
+        <div class="feature-icon icon-ast"><i class="fas fa-map-pin"></i></div>
+        <h3 data-i18n="feat.geo.title">Smart Geo-Fencing</h3>
+        <p data-i18n="feat.geo.desc">Automatic safety scoring based on your location, with alerts when entering high-risk zones.</p>
+      </div>
+      <div class="feature-card card-3d reveal reveal-delay-2" id="feature-panic-button">
+        <div class="feature-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3 data-i18n="feat.panic.title">Panic Button</h3>
+        <p data-i18n="feat.panic.desc">One-tap emergency alert that instantly notifies authorities with your real-time location.</p>
+      </div>
+      <div class="feature-card card-3d reveal reveal-delay-3" id="feature-realtime-chat">
+        <div class="feature-icon"><i class="fas fa-comment-dots"></i></div>
+        <h3 data-i18n="feat.chat.title">Real-Time Chat</h3>
+        <p data-i18n="feat.chat.desc">Stay in touch with your travel squad through socket-powered instant messaging.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rangoli Divider -->
+  <div class="rangoli-divider" style="margin:0 5%" aria-hidden="true"></div>
+
+  <!-- ═══ INDIAN SACRED ANIMALS ═══ -->
+  <section class="animals-section reveal" id="animals-section">
+    <div class="section-header">
+      <span class="section-tag section-tag-india" data-i18n="animals.tag">🇮🇳 Pride of India</span>
+      <h2 data-i18n="animals.h2">Guardians of the Journey</h2>
+      <p data-i18n="animals.sub">Sacred symbols of India — strength, grace, wisdom, and purity guide every SAFAR.</p>
+    </div>
+    <div class="animals-grid">
+
+      <!-- Airavat -->
+      <div class="animal-card airavat card-3d reveal reveal-delay-1" id="animal-airavat">
+        <div class="animal-rings"></div>
+        <img src="/static/images/airavat.png" class="animal-emoji" style="max-height: 120px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.4));" data-tilt alt="Sacred Guardian">
+      </div>
+
+      <!-- Royal Bengal Tiger -->
+      <div class="animal-card tiger card-3d reveal reveal-delay-2" id="animal-tiger">
+        <div class="animal-rings"></div>
+        <img src="/static/images/tiger.png" class="animal-emoji" style="max-height: 120px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(255, 153, 0, 0.4));" data-tilt alt="Sacred Guardian">
+      </div>
+
+      <!-- Peacock -->
+      <div class="animal-card peacock card-3d reveal reveal-delay-3" id="animal-peacock">
+        <div class="animal-rings"></div>
+        <img src="/static/images/peacock.png" class="animal-emoji" style="max-height: 120px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 255, 128, 0.4));" data-tilt alt="Sacred Guardian">
+      </div>
+
+      <!-- Lotus -->
+      <div class="animal-card lotus card-3d reveal reveal-delay-4" id="animal-lotus">
+        <div class="animal-rings"></div>
+        <img src="/static/images/lotus.png" class="animal-emoji" style="max-height: 120px; object-fit: contain; filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.4));" data-tilt alt="Sacred Guardian">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Rangoli Divider -->
+  <div class="rangoli-divider" style="margin:0 5%" aria-hidden="true"></div>
+
+  <!-- ═══ WHY SAFAR ═══ -->
+  <section class="offers-section reveal" id="offers-section">
+    <div class="section-header">
+      <span class="section-tag section-tag-ast" data-i18n="offers.tag">Why SAFAR</span>
+      <h2 data-i18n="offers.h2">Built for Travelers, Backed by AI</h2>
+    </div>
+    <div class="offers-row">
+      <div class="offer-card card-3d reveal reveal-delay-1" id="offer-free">
+        <div class="offer-badge">FREE</div>
+        <div class="offer-icon">🎉</div>
+        <h4 data-i18n="offer.free.title">100% Free Platform</h4>
+        <p data-i18n="offer.free.desc">No subscriptions, no hidden fees. Travel together without spending a rupee on the app.</p>
+      </div>
+      <div class="offer-card card-3d reveal reveal-delay-2" id="offer-ai">
+        <div class="offer-badge">AI</div>
+        <div class="offer-icon">🤖</div>
+        <h4 data-i18n="offer.ai.title">AI-Powered Intelligence</h4>
+        <p data-i18n="offer.ai.desc">Our anomaly detection system monitors travel patterns and flags unusual activity in real time.</p>
+      </div>
+      <div class="offer-card card-3d reveal reveal-delay-3" id="offer-verified">
+        <div class="offer-badge">KYC</div>
+        <div class="offer-icon">✅</div>
+        <h4 data-i18n="offer.kyc.title">Verified Travelers</h4>
+        <p data-i18n="offer.kyc.desc">Every tourist is KYC-verified with Aadhaar/Passport for a safe and trusted travel community.</p>
+      </div>
+      <div class="offer-card card-3d reveal reveal-delay-4" id="offer-realtime">
+        <div class="offer-badge">LIVE</div>
+        <div class="offer-icon">📡</div>
+        <h4 data-i18n="offer.live.title">Real-Time Everything</h4>
+        <p data-i18n="offer.live.desc">Live GPS, live chat, live safety scores — every feature updates instantly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CTA BANNER ═══ -->
+  <section class="cta-banner reveal" id="cta-section">
+    <div class="cta-banner-content">
+      <h2 data-i18n="cta.h2">Ready for Your Next Adventure?</h2>
+      <p data-i18n="cta.sub">Join thousands of travelers who explore India smartly and safely with SAFAR.</p>
+      <div class="cta-banner-btns">
+        <a href="/auth" class="btn btn-tt btn-lg" data-i18n="cta.btn.start">Start Your Journey — Free</a>
+        <a href="/travel" class="btn btn-ghost btn-lg" data-i18n="cta.btn.ai">🤖 Talk to AI Assistant</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer-v2" id="main-footer">
+    <div class="footer-v2-grid">
+      <div class="footer-v2-brand">
+        <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+        <p data-i18n="footer.tagline">India's first AI-powered group travel platform with real-time tourist safety. Plan smart, travel safe.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link" id="social-twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link" id="social-instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link" id="social-linkedin"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-link" id="social-github"><i class="fab fa-github"></i></a>
+        </div>
+        <!-- Footer Gita quote -->
+        <div style="margin-top:16px;padding:12px;border-radius:10px;border:1px solid rgba(245,197,24,0.15);background:rgba(245,197,24,0.04);">
+          <div style="font-family:'Tiro Devanagari Hindi',serif;font-size:0.78rem;color:var(--turmeric);line-height:1.6;">कर्मण्येवाधिकारस्ते मा फलेषु कदाचन</div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:4px;">— Bhagavad Gita 2.47</div>
+        </div>
+      </div>
+      <div class="footer-v2-col">
+        <h4 data-i18n="footer.quicklinks">Quick Links</h4>
+        <a href="/">Home</a><a href="/groups">Find Groups</a>
+        <a href="/travel">AI Assistant</a><a href="/blockchain">Identity Ledger Hub</a>
+        <a href="/about">About Us</a>
+      </div>
+      <div class="footer-v2-col">
+        <h4 data-i18n="footer.safety">Safety</h4>
+        <a href="/profile">Safety Dashboard</a><a href="/admin">Admin Panel</a>
+        <a href="/auth">Register Tourist</a><a href="#">Safety Zones</a>
+      </div>
+      <div class="footer-v2-col">
+        <h4 data-i18n="footer.resources">Resources</h4>
+        <a href="#">Travel Tips</a><a href="#">Emergency Contacts</a>
+        <a href="#">KYC Guidelines</a><a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-v2-bottom">
+      <p data-i18n="footer.copy">© 2025 SAFAR — Built with ❤️ by Team Safar</p>
+    </div>
+  </footer>
+
+  <!-- ═══ CHATBOT ═══ -->
+  <button class="chatbot-fab" id="chatbot-fab">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+  </button>
+  <div class="chatbot-panel" id="chatbot-panel">
+    <div class="chatbot-header">
+      <h3>🤖 SAFAR AI</h3>
+      <div class="chatbot-header-btns">
+        <button id="chatbot-clear">↺</button>
+        <button id="chatbot-close">✕</button>
+      </div>
+    </div>
+    <div class="chatbot-messages" id="chatbot-msgs">
+      <div class="chat-msg bot"><p data-i18n="chatbot.greeting">✈️ Hi! I'm your SAFAR AI assistant. How can I help you plan your next trip?</p></div>
+    </div>
+    <div class="chatbot-input-row">
+      <input type="text" id="chatbot-input" data-i18n-placeholder="chatbot.placeholder" placeholder="Ask me anything about travel...">
+      <button class="chatbot-send" id="chatbot-send">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ GITA FULL MODAL ═══ -->
+  <div class="gita-modal-overlay" id="gita-full-modal">
+    <div class="gita-modal-box">
+      <div class="gita-modal-diya">🪔</div>
+      <div class="gita-modal-sanskrit"></div>
+      <div class="gita-modal-hindi"></div>
+      <div class="gita-modal-english"></div>
+      <div class="gita-modal-ref"></div>
+      <button class="gita-modal-close">✕ Close</button>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+  <script src="/static/i18n.js"></script>
+  <script>
+  // ── Search Widget Tabs ──
+  document.querySelectorAll('.sw-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.sw-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sw-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Animated Counters ──
+  function animateCounters() {
+    document.querySelectorAll('.hero-stat-num').forEach(el => {
+      const target = parseInt(el.dataset.target);
+      const step   = target / (2000 / 16);
+      let current  = 0;
+      const timer  = setInterval(() => {
+        current += step;
+        if (current >= target) { el.textContent = target; clearInterval(timer); }
+        else el.textContent = Math.floor(current);
+      }, 16);
+    });
+  }
+
+  // ── Intersection Observer (scroll reveal + counters) ──
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        if (e.target.id === 'hero-section') animateCounters();
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal, .hero-v2').forEach(s => revealObs.observe(s));
+
+  // ── 3D Card Tilt (vanilla) ──
+  document.querySelectorAll('.card-3d').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r   = card.getBoundingClientRect();
+      const x   = ((e.clientX - r.left) / r.width  - 0.5) * 18;
+      const y   = ((e.clientY - r.top)  / r.height - 0.5) * 18;
+      card.style.transform = `perspective(1200px) rotateY(${x}deg) rotateX(${-y}deg) translateY(-8px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  // ── Diya Flame Canvas ──
+  (function initDiya() {
+    const canvas = document.getElementById('diya-canvas');
+    if (!canvas) return;
+    const ctx    = canvas.getContext('2d');
+    const W      = canvas.width  = canvas.parentElement.offsetWidth  || window.innerWidth;
+    const H      = canvas.height = canvas.parentElement.offsetHeight || window.innerHeight;
+    const particles = [];
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: H + Math.random() * H,
+        radius: 1.5 + Math.random() * 2.5,
+        speedY: 0.4 + Math.random() * 0.8,
+        drift:  (Math.random() - 0.5) * 0.4,
+        hue:    Math.random() > 0.5 ? 30 : 340,
+        life:   Math.random()
+      });
     }
 
-    // ── Intersection Observer for animations ──
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                if (entry.target.id === 'hero-section') animateCounters();
-            }
-        });
-    }, { threshold: 0.15 });
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => {
+        p.y    -= p.speedY;
+        p.x    += p.drift;
+        p.life -= 0.004;
+        if (p.life <= 0 || p.y < -20) {
+          p.x    = Math.random() * W;
+          p.y    = H + 10;
+          p.life = 0.7 + Math.random() * 0.3;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue},100%,60%,${p.life * 0.6})`;
+        ctx.shadowBlur  = 12;
+        ctx.shadowColor = `hsl(${p.hue},100%,55%)`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
 
-    document.querySelectorAll('.hero-v2, .destinations-section, .features-section, .offers-section, .cta-banner').forEach(s => observer.observe(s));
-
-    // ── Destination card parallax on hover ──
-    document.querySelectorAll('.dest-card').forEach(card => {
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-            const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
-            card.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg) translateY(-8px)`;
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = '';
-        });
-    });
-    </script>
+  // ── Lotus Petal Particles ──
+  (function spawnPetals() {
+    const petals  = ['🪷','🌸','🌺','🌼'];
+    const cnt     = document.getElementById('petals-container');
+    if (!cnt) return;
+    for (let i = 0; i < 10; i++) {
+      const el = document.createElement('span');
+      el.className   = 'petal';
+      el.textContent = petals[Math.floor(Math.random() * petals.length)];
+      el.style.left      = Math.random() * 100 + 'vw';
+      el.style.bottom    = (Math.random() * -20 - 5) + 'vh';
+      el.style.opacity   = 0.5 + Math.random() * 0.5;
+      el.style.fontSize  = (0.8 + Math.random() * 0.8) + 'rem';
+      el.style.animationDuration  = (10 + Math.random() * 18) + 's';
+      el.style.animationDelay     = (Math.random() * 15) + 's';
+      cnt.appendChild(el);
+    }
+  })();
+  </script>
 </body>
-
 </html>

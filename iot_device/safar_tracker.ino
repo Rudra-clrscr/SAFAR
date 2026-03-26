@@ -61,18 +61,24 @@ void checkGPS() {
   }
 }
 
+unsigned long lastSOSPress = 0;
+
 void checkSOS() {
   // Read physical button state (Active Low)
   int buttonState = digitalRead(SOS_BUTTON_PIN);
   
-  if (buttonState == LOW) { // Button is pressed
+  if (buttonState == LOW) { // Button is physically held down
     Serial.println("SOS BUTTON PRESSED! Sending alert to SAFAR...");
+    lastSOSPress = millis(); // Refresh the latch timer
+  }
+  
+  // Asynchronous Hardware Latch: Keep the alert active for 4 full seconds 
+  // after the button is released, so the Python backend's 2-second polling 
+  // loop is guaranteed to catch the '1' before it resets.
+  if (millis() - lastSOSPress < 4000) {
     Blynk.virtualWrite(V3, 1);
-    
-    // Simple debounce to prevent spam
-    delay(1000); 
   } else {
-    // Keep backend updated that SOS is off
+    // Backend gets the all-clear
     Blynk.virtualWrite(V3, 0); 
   }
 }

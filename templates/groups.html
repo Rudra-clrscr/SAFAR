@@ -1,84 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Travel Groups — SAFAR</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="groups-page">
-<nav class="navbar" id="main-nav">
-  <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
-  <div class="nav-links" id="nav-links">
-    <a href="/">Home</a><a href="/groups" class="active">Groups</a>
-    <a href="/travel">Travel Assistant</a><a href="/blockchain">Identity Ledger</a><a href="/about">About</a>
-    <div class="nav-divider"></div>
-    {% if username %}<a href="/user" class="nav-badge">👤 {{username}}</a><a href="/profile" class="nav-badge ast">🛡️ Safety</a><a href="/api/auth/logout" class="btn-nav btn-nav-outline">Logout</a>
-    {% else %}<a href="/auth" class="btn-nav btn-nav-outline">Login</a><a href="/auth" class="btn-nav btn-nav-fill">Register</a>{% endif %}
+
+<body class="groups-page" data-lang="en">
+
+  <!-- Gita Bar -->
+  <div class="gita-bar" id="gita-quote-bar">
+    <span class="gita-bar-icon">📖</span>
+    <div class="gita-bar-text">
+      <span class="gita-sanskrit"></span>
+      <span class="gita-sep">·</span>
+      <span class="gita-translation"></span>
+    </div>
+    <span class="gita-ref"></span>
   </div>
-  <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
-</nav>
 
-<div class="groups-hero">
-  <h1>✈️ Find Your Travel Crew</h1>
-  <p>Browse groups, join adventures, or create your own travel gang.</p>
-</div>
-
-<div class="groups-layout">
-  <!-- SIDEBAR: Create group + manage destinations -->
-  <aside class="groups-sidebar">
-    <!-- Create Group -->
-    <div class="card card-tt">
-      <h3 style="margin-bottom:18px;font-size:1.05rem">➕ Create a Group</h3>
-      <form method="POST" action="/groups" style="display:flex;flex-direction:column;gap:13px">
-        <div class="form-group"><label>Group Name</label><input type="text" name="group_name" placeholder="e.g. Manali Squad 2025" required></div>
-        <div class="form-group"><label>Type</label>
-          <select name="group_type" required><option value="" disabled selected>Select type</option><option value="Public">Public</option><option value="Private">Private</option></select>
-        </div>
-        <div class="form-group"><label>Destination</label>
-          <input list="dest-list" name="destination_name" placeholder="Type or select..." required autocomplete="off">
-          <datalist id="dest-list">{% for d in destinations %}<option value="{{d.destination_name}}">{% endfor %}</datalist>
-        </div>
-        <div class="form-group"><label>Description (optional)</label><textarea name="group_description" placeholder="What's the plan?" style="min-height:72px"></textarea></div>
-        <button type="submit" class="btn btn-tt" style="width:100%">Create Group</button>
-      </form>
+  <!-- Discord Sidebar -->
+  <nav class="navbar navbar-with-bar" id="main-nav">
+    <a href="/" class="nav-logo"><span class="logo-safar">SAFAR</span></a>
+    <div class="nav-links" id="nav-links">
+      <a href="/" data-i18n="nav.home">Home</a>
+      <a href="/groups" class="active" data-i18n="nav.groups">Groups</a>
+      <a href="/travel" data-i18n="nav.ai">AI Assistant</a>
+      <a href="/blockchain" data-i18n="nav.identity">Identity Ledger</a>
+      <a href="/about" data-i18n="nav.about">About</a>
+      <div class="nav-divider"></div>
+      {% if username %}
+      <a href="/user" class="nav-badge">👤 {{username}}</a>
+      <a href="/profile" class="nav-badge ast" data-i18n="nav.safety">🛡️ Safety</a>
+      <a href="/api/auth/logout" class="btn-nav btn-nav-outline" data-i18n="nav.logout">Logout</a>
+      {% else %}
+      <a href="/auth" class="btn-nav btn-nav-outline" data-i18n="nav.login">Login</a>
+      <a href="/auth" class="btn-nav btn-nav-fill" data-i18n="nav.getstarted">Register</a>
+      {% endif %}
+      <button id="lang-toggle-btn" title="Toggle Language"><span class="lang-flag">🇯🇳</span><span
+          class="lang-label">EN</span></button>
     </div>
+    <button class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></button>
+  </nav>
 
-    <!-- Manage Destinations -->
-    <div class="card">
-      <h3 style="margin-bottom:14px;font-size:1.05rem">📍 Manage Destinations</h3>
-      <form method="POST" action="/destinations/add" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
-        <input type="text" name="destination_name" placeholder="Destination name" required>
-        <input type="text" name="country" placeholder="Country">
-        <button type="submit" class="btn btn-ghost btn-sm" style="grid-column:1/-1">+ Add Destination</button>
-      </form>
-      <div style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:7px">
-        {% for d in destinations %}
-        <div class="dest-list-item">
-          <form method="POST" action="/destinations/edit/{{d.destination_id}}" style="display:contents">
-            <input type="text" name="destination_name" value="{{d.destination_name}}" style="min-width:0">
-            <input type="text" name="country" value="{{d.country or ''}}" style="min-width:0">
-            <button type="submit" class="btn btn-ghost btn-sm">💾</button>
-          </form>
-          <a href="/destinations/delete/{{d.destination_id}}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this destination?')">🗑️</a>
-        </div>
-        {% else %}
-        <p style="color:var(--text3);font-size:0.85rem;text-align:center;padding:12px">No destinations yet.</p>
-        {% endfor %}
+  <div class="groups-hero">
+    <h1>✈️ Find Your Travel Crew</h1>
+    <p>Browse groups, join adventures, or create your own travel gang.</p>
+  </div>
+
+  <div class="groups-layout">
+    <!-- SIDEBAR: Create group + manage destinations -->
+    <aside class="groups-sidebar">
+      <!-- Create Group -->
+      <div class="card card-tt">
+        <h3 style="margin-bottom:18px;font-size:1.05rem">➕ Create a Group</h3>
+        <form method="POST" action="/groups" style="display:flex;flex-direction:column;gap:13px">
+          <div class="form-group"><label>Group Name</label><input type="text" name="group_name"
+              placeholder="e.g. Manali Squad 2025" required></div>
+          <div class="form-group"><label>Type</label>
+            <select name="group_type" required>
+              <option value="" disabled selected>Select type</option>
+              <option value="Public">Public</option>
+              <option value="Private">Private</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Destination</label>
+            <input list="dest-list" name="destination_name" placeholder="Type or select..." required autocomplete="off">
+            <datalist id="dest-list">{% for d in destinations %}<option value="{{d.destination_name}}">{% endfor
+                %}</datalist>
+          </div>
+          <div class="form-group"><label>Description (optional)</label><textarea name="group_description"
+              placeholder="What's the plan?" style="min-height:72px"></textarea></div>
+          <button type="submit" class="btn btn-tt" style="width:100%">Create Group</button>
+        </form>
       </div>
-    </div>
-  </aside>
 
-  <!-- MAIN: Group list -->
-  <div>
-    <div class="filter-bar">
-      <input type="search" id="g-search" placeholder="🔍 Search groups...">
-      <select id="g-type-filter"><option value="All">All Types</option><option value="Public">Public</option><option value="Private">Private</option></select>
-    </div>
+      <!-- Manage Destinations -->
+      <div class="card">
+        <h3 style="margin-bottom:14px;font-size:1.05rem">📍 Manage Destinations</h3>
+        <form method="POST" action="/destinations/add"
+          style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+          <input type="text" name="destination_name" placeholder="Destination name" required>
+          <input type="text" name="country" placeholder="Country">
+          <button type="submit" class="btn btn-ghost btn-sm" style="grid-column:1/-1">+ Add Destination</button>
+        </form>
+        <div style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:7px">
+          {% for d in destinations %}
+          <div class="dest-list-item">
+            <form method="POST" action="/destinations/edit/{{d.destination_id}}" style="display:contents">
+              <input type="text" name="destination_name" value="{{d.destination_name}}" style="min-width:0">
+              <input type="text" name="country" value="{{d.country or ''}}" style="min-width:0">
+              <button type="submit" class="btn btn-ghost btn-sm">💾</button>
+            </form>
+            <a href="/destinations/delete/{{d.destination_id}}" class="btn btn-danger btn-sm"
+              onclick="return confirm('Delete this destination?')">🗑️</a>
+          </div>
+          {% else %}
+          <p style="color:var(--text3);font-size:0.85rem;text-align:center;padding:12px">No destinations yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
 
-    <div class="groups-list" id="groups-list">
-      {% if groups %}
+    <!-- MAIN: Group list -->
+    <div>
+      <div class="filter-bar">
+        <input type="search" id="g-search" placeholder="🔍 Search groups...">
+        <select id="g-type-filter">
+          <option value="All">All Types</option>
+          <option value="Public">Public</option>
+          <option value="Private">Private</option>
+        </select>
+      </div>
+
+      <div class="groups-list" id="groups-list">
+        {% if groups %}
         {% for g in groups %}
-        <div class="group-card" data-name="{{g.group_name|lower}}" data-dest="{{g.destination_name|lower}}" data-type="{{g.group_type}}">
+        <div class="group-card" data-name="{{g.group_name|lower}}" data-dest="{{g.destination_name|lower}}"
+          data-type="{{g.group_type}}">
           <div class="group-card-header">
             <h3>{{g.group_name}}</h3>
             <span class="badge {{'badge-tt' if g.group_type == 'Public' else 'badge-ast'}}">{{g.group_type}}</span>
@@ -91,49 +132,53 @@
           <p>{{g.group_description or 'No description provided.'}}</p>
           <div class="group-card-actions">
             {% if g.is_member %}
-              <a href="/groups/chat/{{g.group_id}}" class="btn btn-tt btn-sm">💬 Chat</a>
-              {% if user.userid == g.owner_id %}
-                <a href="/groups/delete/{{g.group_id}}" class="btn btn-danger btn-sm" onclick="return confirm('Permanently delete this group?')">🗑️ Delete</a>
-              {% else %}
-                <a href="/groups/leave/{{g.group_id}}" class="btn btn-ghost btn-sm">🚪 Leave</a>
-              {% endif %}
+            <a href="/groups/chat/{{g.group_id}}" class="btn btn-tt btn-sm">💬 Chat</a>
+            {% if user.userid == g.owner_id %}
+            <a href="/groups/delete/{{g.group_id}}" class="btn btn-danger btn-sm"
+              onclick="return confirm('Permanently delete this group?')">🗑️ Delete</a>
             {% else %}
-              <a href="/groups/join/{{g.group_id}}" class="btn btn-success btn-sm">👉 Join</a>
+            <a href="/groups/leave/{{g.group_id}}" class="btn btn-ghost btn-sm">🚪 Leave</a>
+            {% endif %}
+            {% else %}
+            <a href="/groups/join/{{g.group_id}}" class="btn btn-success btn-sm">👉 Join</a>
             {% endif %}
           </div>
         </div>
         {% endfor %}
-      {% else %}
+        {% else %}
         <div style="text-align:center;padding:60px;border:1px dashed var(--border);border-radius:var(--radius2)">
           <p style="font-size:2rem;margin-bottom:12px">✈️</p>
           <h3 style="color:var(--tt)">No groups yet!</h3>
           <p style="color:var(--text2);margin-top:8px">Create the first one and start your adventure.</p>
         </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
-</div>
 
-<footer>
-  <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
-  <p><a href="/blockchain" style="color:var(--text3);text-decoration:none">⛓️ Identity Ledger Security Hub</a></p>
-  <p>© 2025 Mini Project</p>
-</footer>
+  <footer>
+    <div class="footer-logo"><span class="logo-safar">SAFAR</span></div>
+    <p><a href="/blockchain" style="color:var(--text3);text-decoration:none">⛓️ Identity Ledger Security Hub</a></p>
+    <p>© 2025 Mini Project</p>
+  </footer>
 
-<script src="/static/script.js"></script>
-<script>
-const search = document.getElementById('g-search');
-const typeFilter = document.getElementById('g-type-filter');
-function filterGroups() {
-  const q = search.value.toLowerCase();
-  const t = typeFilter.value;
-  document.querySelectorAll('.group-card').forEach(c => {
-    const matchQ = c.dataset.name.includes(q) || c.dataset.dest.includes(q);
-    const matchT = t === 'All' || c.dataset.type === t;
-    c.style.display = (matchQ && matchT) ? '' : 'none';
-  });
-}
-search.addEventListener('input', filterGroups);
-typeFilter.addEventListener('change', filterGroups);
-</script>
-</body></html>
+  <script src="/static/script.js"></script>
+  <script src="/static/i18n.js"></script>
+  <script>
+    const search = document.getElementById('g-search');
+    const typeFilter = document.getElementById('g-type-filter');
+    function filterGroups() {
+      const q = search.value.toLowerCase();
+      const t = typeFilter.value;
+      document.querySelectorAll('.group-card').forEach(c => {
+        const matchQ = c.dataset.name.includes(q) || c.dataset.dest.includes(q);
+        const matchT = t === 'All' || c.dataset.type === t;
+        c.style.display = (matchQ && matchT) ? '' : 'none';
+      });
+    }
+    search.addEventListener('input', filterGroups);
+    typeFilter.addEventListener('change', filterGroups);
+  </script>
+</body>
+
+</html>
